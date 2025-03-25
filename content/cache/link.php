@@ -1,1 +1,0 @@
-<?php exit;//a:1:{i:0;a:4:{s:4:"link";s:5:"EMLOG";s:3:"url";s:21:"https://www.emlog.net";s:4:"icon";s:0:"";s:3:"des";s:17:"emlog官方主页";}}

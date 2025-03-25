@@ -1,1 +1,0 @@
-<?php exit;//a:1:{i:0;a:6:{s:3:"gid";i:1;s:5:"title";s:17:"欢迎使用emlog";s:5:"cover";s:0:"";s:5:"views";s:1:"0";s:6:"comnum";s:1:"1";s:4:"date";s:10:"1742890192";}}
