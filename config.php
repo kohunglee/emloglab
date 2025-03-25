@@ -1,17 +1,15 @@
 <?php
-header("location: ./install.php");
-exit;
 //MySQL database host
 const DB_HOST = 'localhost';
-//MySQL database username
+//Database username
 const DB_USER = 'root';
-//MySQL database user password
-const DB_PASSWD = '';
+//Database user password
+const DB_PASSWD = '15670761746lkh';
 //Database name
-const DB_NAME = 'emlog';
-//Database table prefix
-const DB_PREFIX = 'emlog_';
+const DB_NAME = 'test';
+//Database Table Prefix
+const DB_PREFIX = 'emloglab_';
 //Auth key
-const AUTH_KEY = 'emlog-key';
+const AUTH_KEY = 't@DbBC$qo$UKun!)KP5A6#D69qpCMqFGb977e10d1cb26107909e97d51a688323';
 //Cookie name
-const AUTH_COOKIE_NAME = 'emlog-cookie';
+const AUTH_COOKIE_NAME = 'EM_AUTHCOOKIE_s9HkhltkxOngtLOUeHSwz9mibqtGSoHn';
