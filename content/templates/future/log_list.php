@@ -12,13 +12,9 @@ defined('EMLOG_ROOT') || exit('access denied!');
     ?>
     <div>
         <a href="<?= $value['log_url'] ?>"><?= $value['log_title'] ?></a>
-        <div>
-            <time><?= date('Y-n-j H:i', $value['date']) ?></time>
-        </div>
-        <div>
-            <a href="<?= $value['log_url'] ?>"><span></span> <?= $value['views'] ?></a>
-            <a href="<?= $value['log_url'] ?>#comment"><span></span> <?= $value['comnum'] ?></a>
-        </div>
+        <time><?= date('Y-n-j H:i', $value['date']) ?></time>
+        <a href="<?= $value['log_url'] ?>"><span></span> <?= $value['views'] ?></a>
+        <a href="<?= $value['log_url'] ?>#comment"><span></span> <?= $value['comnum'] ?></a>
     </div>
     <?php
         endforeach;

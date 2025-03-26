@@ -12,10 +12,9 @@ defined('EMLOG_ROOT') || exit('access denied!');
         <span>阅读：<?= $views ?></span>
     </p>
     <hr/>
-    <div id="emlogEchoLog"><?= $log_content ?></div>
+    <article id="emlogEchoLog"><?= $log_content ?></article>
 
     <?php doAction('log_related', $logData) ?>
 
-    <div style="clear:both;"></div>
 </article>
 <?php include View::getView('footer') ?>
