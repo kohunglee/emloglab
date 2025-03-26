@@ -11,7 +11,7 @@ defined('EMLOG_ROOT') || exit('access denied!');
 <head>
     <meta charset="utf-8">
     <title>错误提示-页面未找到</title>
-    <link href="<?= TEMPLATE_URL ?>css/style.css?t=<?= Option::EMLOG_VERSION_TIMESTAMP ?>" rel="stylesheet" type="text/css" />
+    <link href="<?= TEMPLATE_URL ?>css/mvp.css" rel="stylesheet" />
     <style>
         .main {
             background-color: var(--bodyBground);

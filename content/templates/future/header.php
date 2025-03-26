@@ -10,7 +10,6 @@ Author Url:https://www.ccgxk.com/
 
 defined('EMLOG_ROOT') || exit('access denied!');
 if (!function_exists('_g')) { emMsg('请开启【模板设置】插件, <a href="/admin/plugin.php">去开启</a>'); }
-$templates = '1.0';
 ?>
 <!DOCTYPE html>
 <html lang="zh" data-theme="light">
@@ -22,14 +21,15 @@ $templates = '1.0';
     <meta name="description" content="<?= $site_description ?>" />
     <link rel="alternate" title="RSS" href="<?= BLOG_URL ?>rss.php" type="application/rss+xml" />
     <link href="<?= TEMPLATE_URL ?>css/style.css" rel="stylesheet" />
+    <link href="<?= TEMPLATE_URL ?>css/mvp.css" rel="stylesheet" />
     <script src="<?= TEMPLATE_URL ?>js/jquery.min.3.5.1.js"></script>
     <script src="<?= TEMPLATE_URL ?>js/main.js"></script>
     <?php doAction('index_head') ?>
 </head>
 
 <body>
-    <div class="blog-header-c container">
-        <a class="blog-header-title" href="<?= BLOG_URL ?>"><?= $blogname ?></a>
-        <div class="blog-header-subtitle subtitle-overflow" title="<?= $bloginfo ?>"><?= $bloginfo ?></div>
+    <header>
+        <a href="<?= BLOG_URL ?>"><?= $blogname ?></a>
+        <div title="<?= $bloginfo ?>"><?= $bloginfo ?></div>
         <?php doAction('index_navi_ext') ?>
-    </div>
+    </header>

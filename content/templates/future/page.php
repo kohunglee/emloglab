@@ -12,12 +12,8 @@ defined('EMLOG_ROOT') || exit('access denied!');
             <div class="markdown">
                 <?= $log_content ?>
             </div>
-            <?php blog_comments_post($logid, $ckname, $ckmail, $ckurl, $verifyCode, $allow_remark) ?>
-            <?php blog_comments($comments, $comnum) ?>
         </div>
-        <?php
-        include View::getView('side');
-        ?>
+        <?php include View::getView('side'); ?>
     </div>
 </article>
 <?php
