@@ -1,1 +1,4 @@
 /content/cache/*
+/content/templates/*
+/content/plugins/*
+/content/uploadfile/*
