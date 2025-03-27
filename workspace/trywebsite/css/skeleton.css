@@ -1,0 +1,14 @@
+html {
+  color: #565656;
+  --co:#aaa;
+
+}
+
+.header-title {
+  margin: 10px 10%;
+  font-size: 26px;
+  width: fit-content;
+  padding: 20px;
+  border: 6px solid #eee;
+
+}
