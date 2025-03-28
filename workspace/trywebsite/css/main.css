@@ -1,14 +1,8 @@
-html {
-  color: #565656;
-  --co:#aaa;
-
-}
-
-.header-title {
-  margin: 10px 10%;
-  font-size: 26px;
-  width: fit-content;
-  padding: 20px;
-  border: 6px solid #eee;
-
+:root {
+  --kpurple-transp: #rgba(113,10,83,0.8);  /* 透明的网页紫 */
+  --kpurple: #97267b;  /* 网页紫 */
+  --kfontcolor: #710a53; /* 字体黑 */
+  --klight-purple: #dfc8d9;  /* 浅紫色 */
+  --grey-font: #888888;  /* 灰色字 */
+  --kgrey-purple: #8d3b75;  /* 灰紫色字 */
 }
