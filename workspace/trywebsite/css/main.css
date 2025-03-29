@@ -6,11 +6,16 @@
   --grey-font: #888888;  /* 灰色字 */
   --kgrey-purple: #8d3b75;  /* 灰紫色字 */
 }
+* { 
+	box-sizing: border-box
+}
 
 .displaynone {
   display: none;
 }
 
+
+/* 头部 */
 .header {
   width: 1200px;
   height: 135px;
@@ -19,7 +24,47 @@
   position: relative;
   z-index: 2;
 }
-
+.header-left {
+  float: left;
+  margin-top: 30px;
+}
+.header-links-ul, .header-nav-ul {
+  list-style: none;
+  padding: 0;
+}
+.header-link-li, .header-nav-li {
+  display: inline-block;
+}
+.header-right {
+  float: right;
+  margin-top: 15px;
+}
+.header-links {
+  float: right;
+  background-color: aliceblue;
+  display: block;
+  height: 35px;
+  line-height: 8px;
+  font-size: 14px;
+  padding-inline: 10px;
+  border-radius: 100px;
+}
+.header-links-ul {
+  background-color: red;
+  padding: 0;
+}
+.header-link-li {
+  margin-inline: 7px;
+}
+.header-nav {
+  background: yellow;
+  height: 50px;
+  margin-top: calc(35px + 10px);
+  font-size: 18px;
+}
+.header-nav-li {
+  padding-inline: 15px;
+}
 
 /* 滚动图 */
 .scroll-chart {
@@ -28,12 +73,10 @@
   margin-top: -135px;
   z-index: 1;
 }
-
 .scroll-chart-list {
   padding: 0;
   margin: 0 auto;
 }
-
 .scroll-img {
   width: 100%;
   display: block;
@@ -48,20 +91,16 @@
   position: relative;
   margin-top: calc(933px - 135px - 70px);
 }
-
-
 .center-toc-c {
   width: 1200px;
   margin: 0 auto;
 }
-
 .center-toc-ul {
   margin: 0;
   list-style: none;
   float: left;
   height: 70px;
 }
-
 .center-toc-li {
   display: inline-block;
 }
@@ -69,19 +108,61 @@
 
 /* 新闻 */
 .news {
+  background-color: green;
   margin: 0 auto;
   padding: 0;
   height: 580px;
 }
 
+
+/* 系列专题 */
 .special-series {
   background-color: red;
+  height: 428px;
+}
+.special-series-c {
+  width: 1200px;
 }
 
+
+/* 文章 */
 .essay {
+  height: 545px;
   background-color: silver;
 }
+.essay-c {
+  width: 1200px;
+  margin: 0 auto;
+}
 
+
+/* 视频 */
 .video {
+  height: 580px;
   background-color: yellow;
+}
+.video-c {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+
+/* 图式链接 */
+.imagelinks {
+  height: 220px;
+  background-color: red;
+}
+.imagelinks-c {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+/* 页足 */
+.footer {
+  height: 273px;
+  background-color: aqua;
+}
+.footer-c {
+  width: 1200px;
+  margin: 0 auto;
 }
