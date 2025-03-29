@@ -6,3 +6,78 @@
   --grey-font: #888888;  /* 灰色字 */
   --kgrey-purple: #8d3b75;  /* 灰紫色字 */
 }
+
+.displaynone {
+  display: none;
+}
+
+.header {
+  width: 1200px;
+  height: 135px;
+  margin: 0 auto;
+  background-color: red;
+  position: relative;
+  z-index: 2;
+}
+
+
+/* 滚动图 */
+.scroll-chart {
+  position: absolute;
+  background-color: silver;
+  margin-top: -135px;
+  z-index: 1;
+}
+
+.scroll-chart-list {
+  padding: 0;
+  margin: 0 auto;
+}
+
+.scroll-img {
+  width: 100%;
+  display: block;
+}
+
+
+/* 中央 TOC */
+.center-toc {
+  background-color: #ffff008c;
+  height: 70px;
+  z-index: 2;
+  position: relative;
+  top: -70px;
+}
+
+
+.center-toc-c {
+  width: 1200px;
+  margin: 0 auto;
+}
+
+.center-toc-ul {
+  margin: 0;
+  list-style: none;
+  float: left;
+  height: 70px;
+}
+
+.center-toc-li {
+  display: inline-block;
+}
+
+.news {
+  background-color: pink;
+}
+
+.special-series {
+  background-color: red;
+}
+
+.essay {
+  background-color: silver;
+}
+
+.video {
+  background-color: yellow;
+}
