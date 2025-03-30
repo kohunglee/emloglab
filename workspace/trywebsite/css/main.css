@@ -152,6 +152,11 @@ a:link, a:visited {
 .news-toc {
   background-color: pink;
   text-align: center;
+  margin-top: 55px;
+  font-size: 28px;
+}
+.news-title {
+  margin-inline: 25px;
 }
 
 
