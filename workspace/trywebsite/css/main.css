@@ -158,6 +158,11 @@ a:link, a:visited {
 .news-title {
   margin-inline: 25px;
 }
+.news-lastest-c {
+  background-color: red;
+  width: 350px;
+  float: left;
+}
 
 
 /* 系列专题 */
