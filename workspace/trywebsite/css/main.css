@@ -9,9 +9,14 @@
 * { 
 	box-sizing: border-box
 }
-
 .displaynone {
   display: none;
+}
+body {
+  font-size: 14px;
+}
+a:link, a:visited {
+  text-decoration: none;
 }
 
 
@@ -55,6 +60,7 @@
 }
 .header-link-li {
   margin-inline: 7px;
+  
 }
 .header-nav {
   background: yellow;
@@ -64,6 +70,7 @@
 }
 .header-nav-li {
   padding-inline: 15px;
+  line-height: 50px;
 }
 
 /* 滚动图 */
@@ -100,9 +107,33 @@
   list-style: none;
   float: left;
   height: 70px;
+  padding: 0;
 }
 .center-toc-li {
   display: inline-block;
+}
+.center-toc-a {
+  font-size: 18px;
+  width: 115px;
+  display: block;
+  line-height: 70px;
+}
+.center-search {
+  float: right;
+}
+.center-search-form {
+  background-color: gray;
+  margin: 15px 0;
+  border-radius: 20px;
+}
+.center-search-input {
+  width: 185px;
+  height: 40px;
+  border: none;
+  background: none;
+}
+.center-search-submit {
+  border-radius: 100px;
 }
 
 
@@ -112,6 +143,15 @@
   margin: 0 auto;
   padding: 0;
   height: 580px;
+  display: flex;
+}
+.news-c {
+  width: 1200px;
+  margin: 0 auto;
+}
+.news-toc {
+  background-color: pink;
+  text-align: center;
 }
 
 

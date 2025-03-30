@@ -2,3 +2,5 @@
 /content/templates/*
 /content/plugins/*
 /content/uploadfile/*
+
+config.php
