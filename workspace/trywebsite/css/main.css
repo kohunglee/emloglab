@@ -133,7 +133,10 @@ a:link, a:visited {
   background: none;
 }
 .center-search-submit {
-  border-radius: 100px;
+  width: 40px;
+  height: 37px;
+  border: none;
+  background: url(./image/search.png) no-repeat center center;
 }
 
 
@@ -153,6 +156,7 @@ a:link, a:visited {
   background-color: pink;
   text-align: center;
   margin-top: 55px;
+  margin-bottom: 35px;
   font-size: 28px;
 }
 .news-title {
@@ -161,39 +165,103 @@ a:link, a:visited {
 .news-lastest-c {
   background-color: red;
   width: 350px;
+  height: 387px;
   float: left;
+}
+.news-lastest > .news-lastest-c:not(:first-child) {
+  margin-left: 75px;
 }
 
 
 /* 系列专题 */
 .special-series {
   background-color: red;
-  height: 428px;
+  height: 375px;
+  display: flex;
 }
 .special-series-c {
+  margin: 0 auto;
   width: 1200px;
+}
+.series-title {
+  background-color: bisque;
+  margin-top: 55px;
+  text-align: center;
+  font-size: 28px;
+}
+.series-ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  margin-top: 55px;
+}
+.series-ul > .series-li:not(:first-child) {
+  margin-left: 25px;
+}
+.series-li {
+  background-color: blue;
+  width: 400px;
+  margin: 5px;
+  height: 180px;
 }
 
 
 /* 文章 */
 .essay {
-  height: 545px;
+  height: 600px;
   background-color: silver;
+  display: flex;
 }
 .essay-c {
   width: 1200px;
   margin: 0 auto;
+  background-color: aqua;
+}
+.essay-leftimg {
+  background-color: beige;
+  height: 420px;
+  width: 585px;
+  margin-top: 100px;
+  float: left;
+}
+.essay-class-name {
+  background-color: yellow;
+  width: 600px;
+  height: 420px;
+  float: left;
+  margin-top: 100px;
+}
+.essay-leftimg {
+  background-color: beige;
+  height: 420px;
+  width: 585px;
+  margin-top: 100px;
+  float: left;
+  margin-right: 15px;
 }
 
 
 /* 视频 */
 .video {
   height: 580px;
-  background-color: yellow;
+  background-color: beige;
+  display: flex;
 }
 .video-c {
   width: 1200px;
   margin: 0 auto;
+  background-color: aliceblue;
+}
+.video-cardname {
+  background-color: hotpink;
+  margin-top: 50px;
+  font-size: 28px;
+  text-align: center;
+}
+.video-card {
+  background-color: bisque;
+  height: 350px;
+  margin-top: 60px;
 }
 
 
@@ -201,18 +269,42 @@ a:link, a:visited {
 .imagelinks {
   height: 220px;
   background-color: red;
+  display: flex;
 }
 .imagelinks-c {
   width: 1200px;
   margin: 0 auto;
+  background-color: coral;
+  display: flex;
+}
+.imagelinks-card {
+  background-color: azure;
+  width: 200px;
+  outline: solid;
 }
 
 /* 页足 */
 .footer {
   height: 273px;
   background-color: aqua;
+  display: flex;
 }
 .footer-c {
   width: 1200px;
   margin: 0 auto;
+  background-color: beige;
+}
+.footer-simplenav {
+  height: 75px;
+  background-color: blue;
+}
+.footer-links {
+  height: 90px;
+  background-color: azure;
+  margin-top: 35px;
+}
+.footer-icp {
+  height: 30px;
+  background-color: yellow;
+  margin-top: 2px;
 }
