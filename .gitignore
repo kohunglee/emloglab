@@ -2,5 +2,8 @@
 /content/templates/*
 /content/plugins/*
 /content/uploadfile/*
+/wordspace/python/myscreen/
+/wordspace/python/video_output/
+/
 
 config.php
