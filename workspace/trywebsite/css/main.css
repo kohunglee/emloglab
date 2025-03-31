@@ -20,6 +20,8 @@ a:link, a:visited {
 }
 
 
+/* --------- 屏幕大小 大于 1200 --------- */
+
 /* 头部 */
 .header {
   width: 1200px;
@@ -474,12 +476,33 @@ a:link, a:visited {
 }
 .footer-social {
   width: 250px;
+  padding-left: 10px;
+  padding-top: 18px;
+}
+.footer-social-logo {
+  height: 40px;
+  background-color: violet !important;
+  width: 40px;
+  display: inline-block;
+}
+.footer-social > .footer-social-logo:not(:first-child) {
+  margin-left: 22px;
 }
 .footer-sydw {
   width: 80px;
+}
+.footer-sydw-img {
+  margin-left: -15px;
 }
 .footer-icp {
   height: 30px;
   background-color: yellow;
   margin-top: 2px;
+  line-height: 30px;
+  text-align: center;
 }
+
+/* --------- 屏幕大小 1000 ~ 1200 --------- */
+
+
+/* --------- 屏幕大小 小于 1000 --------- */
