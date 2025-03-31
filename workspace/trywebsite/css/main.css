@@ -195,6 +195,10 @@ a:link, a:visited {
   padding: 0;
   margin: 0;
 }
+.lastest-three-li {
+  display: inline-block;
+  margin-bottom: 13.5px;
+}
 .lastest-three-time {
   background-color: white;
   width: 45px;
@@ -212,17 +216,13 @@ a:link, a:visited {
 }
 .lastest-three-title {
   background-color: #999;
-}
-
-.lastest-three-title {
-  background-color: #999;
   float: right;
-  width: 336px;
+  width: 374px;
   font-size: 16px;
   text-align: justify;
-  padding-block: 5px;
+  padding-block: 2px;
+  padding-left: 29px;
 }
-
 
 /* 系列专题 */
 .special-series {
@@ -254,6 +254,11 @@ a:link, a:visited {
   width: 400px;
   margin: 5px;
   height: 180px;
+}
+.series-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 
@@ -290,6 +295,43 @@ a:link, a:visited {
   float: left;
   margin-right: 15px;
 }
+.essay-leftimg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.essay-toc-ul {
+  background-color: #e88;
+  padding: 0;
+  margin: 0;
+  padding-left: 20px;
+}
+.essay-toc-li {
+  display: inline-block;
+  font-size: 28px;
+  margin-right: 23px;
+}
+.essayclass-c {
+  margin-top: 70px;
+}
+.essay-title {
+  font-size: 20px;
+  background-color: beige;
+  display: block;
+  width: 470px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  float: left;
+  margin-bottom: 25px;
+}
+.essay-time {
+  font-size: 14px;
+  float: right;
+  background-color: cadetblue;
+  line-height: 23px;
+  padding-right: 5px;
+}
 
 
 /* 视频 */
@@ -314,6 +356,34 @@ a:link, a:visited {
   height: 350px;
   margin-top: 60px;
 }
+.video-ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+}
+.video-ul > .video-li:not(:first-child) {
+  margin-left: 40px;
+}
+.video-videoimage {
+  background-color: azure;
+  display: block;
+  width: 330px;
+  height: 220px;
+  object-fit: cover;
+}
+.video-li {
+  display: inline-block;
+}
+.video-videotitle {
+  display: block;
+  background-color: beige;
+  text-align: center;
+  margin-top: 20px;
+  font-size: 18px;
+}
 
 
 /* 图式链接 */
@@ -332,7 +402,18 @@ a:link, a:visited {
   background-color: azure;
   width: 200px;
   outline: solid;
+  height: 135px;
+  margin-top: 40px;
+  background-repeat: no-repeat;
+  background-image: url(../image/links.png);
 }
+.imagelinks-card-1 { background-position: center 0px; }
+.imagelinks-card-2 { background-position: center calc(1 * -135px); }
+.imagelinks-card-3 { background-position: center calc(2 * -135px); }
+.imagelinks-card-4 { background-position: center calc(3 * -135px); }
+.imagelinks-card-5 { background-position: center calc(4 * -135px); }
+.imagelinks-card-6 { background-position: center calc(5 * -135px); }
+
 
 /* 页足 */
 .footer {
@@ -347,12 +428,55 @@ a:link, a:visited {
 }
 .footer-simplenav {
   height: 75px;
-  background-color: blue;
+  background-color: violet;
+}
+.footer-simplenav-ul {
+  font-size: 16px;
+  list-style: none;
+  margin: 0;
+  padding: 0px;
+  display: flex;
+  justify-content: center;
+  padding-top: 30px;
+}
+.footer-simplenav-li {
+  padding-inline: 20px;
 }
 .footer-links {
   height: 90px;
   background-color: azure;
   margin-top: 35px;
+  display: flex;
+  justify-content: space-between;
+}
+.footer-links div {
+  background-color: coral;
+}
+.footer-logo {
+  width: 270px;
+}
+.footer-logo-img {
+  margin-left: 20px;
+  margin-top: 5px;
+}
+.footer-addr {
+  width: 150px;
+}
+.footer-addr-title {
+  font-size: 16px;
+  line-height: 10px;
+  font-weight: 900;
+}
+.footer-addr-info {
+  font-size: 16px;
+  margin-top: -3px;
+  line-height: 26px;
+}
+.footer-social {
+  width: 250px;
+}
+.footer-sydw {
+  width: 80px;
 }
 .footer-icp {
   height: 30px;
