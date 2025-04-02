@@ -70,6 +70,10 @@ a:link, a:visited {
 .header-link-li-a, .header-link-li-span {
   color: rgba(255, 255, 255, 0.5);
 }
+.header-link-li-a:hover {
+  color: rgba(255, 255, 255, 1.0);
+}
+
 .header-nav {
   /* background: yellow; */
   height: 50px;
@@ -123,14 +127,22 @@ a:link, a:visited {
   padding: 0;
 }
 .center-toc-li {
+  width: 112px;
+  vertical-align: middle;
   display: inline-block;
 }
 .center-toc-a {
   font-size: 18px;
-  width: 115px;
+  text-align: center;
   display: block;
   line-height: 70px;
   color: #fff;
+  transition: all 0.1s;
+  -webkit-transition: all 0.4s; /* Safari */
+}
+.center-toc-li a:hover {
+  font-size: 24px;
+  /* line-height: normal; */
 }
 .center-search {
   float: right;
@@ -184,6 +196,11 @@ a:link, a:visited {
   width: 340px;
   height: 387px;
   float: left;
+  cursor: pointer;
+  overflow: hidden; 
+}
+.lastest-imagenew:hover {
+  background: #872f6d url(../image/bg_newspic.png) no-repeat bottom center;
 }
 .lastest-one, .lastest-two {
   outline: 1px solid #e4e2e2;
@@ -198,7 +215,18 @@ a:link, a:visited {
   height: 240px;
   object-fit: cover;
   width: 100%;
+  transition: all 0.4s ease-out;
 }
+.lastest-imagenew:hover .news-lastest-title {
+  color: #fff;
+}
+.lastest-imagenew:hover .news-lastest-time {
+  color: #fff;
+}
+.lastest-imagenew:hover .news-lastest-topimg {
+  transform: scale(1.1);
+}
+
 .news-lastest-title {
   /* background-color: yellow; */
   height: 85px;
@@ -252,7 +280,7 @@ a:link, a:visited {
 /* 系列专题 */
 .special-series {
   /* background-color: red; */
-  background: #fff url(../image/bg_specials.jpg) no-repeat center top;
+  background: #fff url(../image/bg_specials.jpg) repeat center top;
   height: 375px;
   display: flex;
 }
@@ -281,11 +309,16 @@ a:link, a:visited {
   width: 400px;
   margin: 5px;
   height: 180px;
+  overflow: hidden;
 }
 .series-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: all 0.4s ease-out;
+}
+.series-img:hover {
+  transform: scale(1.05);
 }
 
 
@@ -342,7 +375,7 @@ a:link, a:visited {
   color: #710a53;
 }
 .essayclass-c {
-  margin-top: 70px;
+  margin-top: 58.5px;
 }
 .essay-title {
   color: #444;
@@ -354,7 +387,12 @@ a:link, a:visited {
   overflow: hidden;
   white-space: nowrap;
   float: left;
-  margin-bottom: 25px;
+  margin-block: 12.5px;
+  cursor: pointer;
+}
+.essay-title:hover {
+  font-size: 23px;
+  height: 23px;
 }
 .essay-time {
   font-size: 14px;
@@ -370,21 +408,21 @@ a:link, a:visited {
   height: 580px;
   /* background-color: beige; */
   display: flex;
-  background: #fff url(../image/bg_videos.png) no-repeat center top;
+  background: #fff url(../image/bg_videos.png) repeat center top;
 }
 .video-c {
   width: 1200px;
   margin: 0 auto;
-  background-color: aliceblue;
+  /* background-color: aliceblue; */
 }
 .video-cardname {
-  background-color: hotpink;
+  /* background-color: hotpink; */
   margin-top: 50px;
   font-size: 28px;
   text-align: center;
 }
 .video-card {
-  background-color: bisque;
+  background-color: #fff;
   height: 350px;
   margin-top: 60px;
 }
@@ -400,18 +438,23 @@ a:link, a:visited {
   margin-left: 40px;
 }
 .video-videoimage {
-  background-color: azure;
+  /* background-color: azure; */
   display: block;
   width: 330px;
   height: 220px;
   object-fit: cover;
+  transition: all 0.4s ease-out;
 }
 .video-li {
   display: inline-block;
+  overflow: hidden;
+}
+.video-li:hover .video-videoimage {
+  transform: scale(1.1);
 }
 .video-videotitle {
   display: block;
-  background-color: beige;
+  /* background-color: beige; */
   text-align: center;
   margin-top: 20px;
   font-size: 18px;
@@ -421,22 +464,23 @@ a:link, a:visited {
 /* 图式链接 */
 .imagelinks {
   height: 220px;
-  background-color: red;
+  /* background-color: red; */
 }
 .imagelinks-c {
   width: 1200px;
   margin: 0 auto;
-  background-color: coral;
+  /* background-color: coral; */
 }
 .imagelinks-card {
-  background-color: azure;
+  /* background-color: azure; */
   width: 196px;
   display: inline-block;
-  outline: solid;
+  /* outline: solid; */
   height: 135px;
   margin-top: 40px;
   background-repeat: no-repeat;
   background-image: url(../image/links.png);
+  cursor: pointer;
 }
 .imagelinks-card-1 { background-position: center 0px; }
 .imagelinks-card-2 { background-position: center calc(1 * -135px); }
@@ -444,22 +488,34 @@ a:link, a:visited {
 .imagelinks-card-4 { background-position: center calc(3 * -135px); }
 .imagelinks-card-5 { background-position: center calc(4 * -135px); }
 .imagelinks-card-6 { background-position: center calc(5 * -135px); }
+/**/
+.imagelinks-card-1:hover { background-position: center calc(6 * -135px); }
+.imagelinks-card-2:hover { background-position: center calc(7 * -135px); }
+.imagelinks-card-3:hover { background-position: center calc(8 * -135px); }
+.imagelinks-card-4:hover { background-position: center calc(9 * -135px); }
+.imagelinks-card-5:hover { background-position: center calc(10 * -135px); }
+.imagelinks-card-6:hover { background-position: center calc(11 * -135px); }
 
 
 /* 页足 */
 .footer {
-  height: 273px;
-  background-color: aqua;
+  color: rgba(255, 255, 255, 0.6);
+  /* height: 273px; */
+  /* background-color: aqua; */
   display: flex;
-}
+  background: #8d3a74 url(../image/bg_footer.jpg) no-repeat center top;
+  }
+  .footer a {
+    color: rgba(255, 255, 255, 0.6);
+  }
 .footer-c {
   width: 1200px;
   margin: 0 auto;
-  background-color: beige;
+  /* background-color: beige; */
 }
 .footer-simplenav {
   height: 75px;
-  background-color: violet;
+  /* background-color: violet; */
 }
 .footer-simplenav-ul {
   font-size: 16px;
@@ -476,14 +532,14 @@ a:link, a:visited {
 }
 .footer-links {
   height: 90px;
-  background-color: azure;
+  /* background-color: azure; */
   margin-top: 35px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
 }
 .footer-links div {
-  background-color: coral;
+  /* background-color: coral; */
 }
 .footer-logo {
   width: 270px;
@@ -513,7 +569,7 @@ a:link, a:visited {
 }
 .footer-social-logo {
   height: 40px;
-  background-color: violet !important;
+  /* background-color: violet !important; */
   width: 40px;
   display: inline-block;
 }
@@ -528,7 +584,7 @@ a:link, a:visited {
 }
 .footer-icp {
   height: 30px;
-  background-color: yellow;
+  /* background-color: yellow; */
   margin-top: 2px;
   line-height: 30px;
   text-align: center;
@@ -694,7 +750,7 @@ a:link, a:visited {
     height: auto;
   }
   .lastest-three-title {
-    width: calc(100vw - 78px);
+    width: calc(100vw - 100px);
   }
   .series-ul > .series-li:not(:first-child) {
     display: none;
@@ -747,9 +803,16 @@ a:link, a:visited {
     margin-top: 40px;
     margin-bottom: 130px;
   }
+  .video-card {
+    background-color: unset;
+  }
   .video-videoimage {
     width: 100%;
     height: auto;
+    padding: 30px;
+  }
+  .imagelinks {
+    height: 275px;
   }
   .imagelinks-card {
     width: 32.5%;
