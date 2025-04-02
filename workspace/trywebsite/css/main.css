@@ -14,6 +14,7 @@
 }
 body {
   font-size: 14px;
+  color: #710a53;
 }
 a:link, a:visited {
   text-decoration: none;
@@ -27,7 +28,7 @@ a:link, a:visited {
   width: 1200px;
   height: 135px;
   margin: 0 auto;
-  background-color: red;
+  /* background-color: red; */
   position: absolute;
   z-index: 2;
   margin-left: calc(100vw / 2 - 600px);
@@ -51,7 +52,7 @@ a:link, a:visited {
 }
 .header-links {
   float: right;
-  background-color: aliceblue;
+  background-color: rgba(255,255,255,0.05);
   display: block;
   height: 35px;
   line-height: 8px;
@@ -60,15 +61,17 @@ a:link, a:visited {
   border-radius: 100px;
 }
 .header-links-ul {
-  background-color: red;
+  /* background-color: red; */
   padding: 0;
 }
 .header-link-li {
-  margin-inline: 7px;
-  
+  margin-inline: 7px;  
+}
+.header-link-li-a, .header-link-li-span {
+  color: rgba(255, 255, 255, 0.5);
 }
 .header-nav {
-  background: yellow;
+  /* background: yellow; */
   height: 50px;
   margin-top: calc(35px + 10px);
   font-size: 18px;
@@ -76,6 +79,9 @@ a:link, a:visited {
 .header-nav-li {
   padding-inline: 15px;
   line-height: 50px;
+}
+.header-nav-a {
+  color: #fff;
 }
 .header-mobilenav {
   display: none;
@@ -99,7 +105,7 @@ a:link, a:visited {
 
 /* 中央 TOC */
 .center-toc {
-  background-color: #ffff008c;
+  background-color: rgba(113,10,83,0.8);
   height: 70px;
   z-index: 2;
   position: relative;
@@ -124,18 +130,22 @@ a:link, a:visited {
   width: 115px;
   display: block;
   line-height: 70px;
+  color: #fff;
 }
 .center-search {
   float: right;
 }
 .center-search-form {
-  background-color: gray;
+  background-color: rgba(255,255,255,0.3);
   margin: 15px 0;
   border-radius: 20px;
 }
 .center-search-input {
   width: 185px;
   height: 40px;
+  padding-left: 20px;
+  outline: 0;
+  color: #fff;
   border: none;
   background: none;
 }
@@ -149,7 +159,7 @@ a:link, a:visited {
 
 /* 新闻 */
 .news {
-  background-color: green;
+  background-color: #fff;
   margin: 0 auto;
   padding: 0;
   height: 580px;
@@ -160,20 +170,23 @@ a:link, a:visited {
   margin: 0 auto;
 }
 .news-toc {
-  background-color: pink;
+  /* background-color: pink; */
   text-align: center;
   margin-top: 55px;
-  margin-bottom: 35px;
+  margin-bottom: 52px;
   font-size: 28px;
 }
 .news-title {
   margin-inline: 25px;
 }
 .news-lastest-c {
-  background-color: red;
+  /* background-color: red; */
   width: 340px;
   height: 387px;
   float: left;
+}
+.lastest-one, .lastest-two {
+  outline: 1px solid #e4e2e2;
 }
 .lastest-three {
   width: 420px;
@@ -187,15 +200,17 @@ a:link, a:visited {
   width: 100%;
 }
 .news-lastest-title {
-  background-color: yellow;
+  /* background-color: yellow; */
   height: 85px;
   padding: 15px;
   font-size: 18px;
+  color: #8d3a74;
 }
 .news-lastest-time {
   font-size: 16px;
-  background-color: aqua;
+  /* background-color: aqua; */
   padding: 15px 0 0 25px;
+  color: #710a53;
 }
 .lastest-three-ul {
   list-style: none;
@@ -222,7 +237,7 @@ a:link, a:visited {
   margin-top: 3px;
 }
 .lastest-three-title {
-  background-color: #999;
+  /* background-color: #999; */
   float: right;
   width: 374px;
   font-size: 16px;
@@ -230,10 +245,14 @@ a:link, a:visited {
   padding-block: 2px;
   padding-left: 29px;
 }
+.lastest-three-title-a {
+  color: #444;
+}
 
 /* 系列专题 */
 .special-series {
-  background-color: red;
+  /* background-color: red; */
+  background: #fff url(../image/bg_specials.jpg) no-repeat center top;
   height: 375px;
   display: flex;
 }
@@ -242,7 +261,8 @@ a:link, a:visited {
   width: 1200px;
 }
 .series-title {
-  background-color: bisque;
+  /* background-color: bisque; */
+  color: #fff;
   margin-top: 55px;
   text-align: center;
   font-size: 28px;
@@ -272,23 +292,23 @@ a:link, a:visited {
 /* 文章 */
 .essay {
   height: 600px;
-  background-color: silver;
+  /* background-color: slver; */
   display: flex;
 }
 .essay-c {
   width: 1200px;
   margin: 0 auto;
-  background-color: aqua;
+  /* background-color: aqua; */
 }
 .essay-leftimg {
-  background-color: beige;
+  /* background-color: beige; */
   height: 420px;
   width: 585px;
   margin-top: 100px;
   float: left;
 }
 .essay-class-name {
-  background-color: yellow;
+  /* background-color: yellow; */
   width: 600px;
   height: 420px;
   float: left;
@@ -297,7 +317,7 @@ a:link, a:visited {
   left: 15px;
 }
 .essay-leftimg {
-  background-color: beige;
+  /* background-color: beige; */
   height: 420px;
   width: 570px;
   margin-top: 100px;
@@ -310,7 +330,7 @@ a:link, a:visited {
   object-fit: cover;
 }
 .essay-toc-ul {
-  background-color: #e88;
+  /* background-color: #e88; */
   padding: 0;
   margin: 0;
   padding-left: 20px;
@@ -319,13 +339,15 @@ a:link, a:visited {
   display: inline-block;
   font-size: 28px;
   margin-right: 23px;
+  color: #710a53;
 }
 .essayclass-c {
   margin-top: 70px;
 }
 .essay-title {
+  color: #444;
   font-size: 20px;
-  background-color: beige;
+  /* background-color: beige; */
   display: block;
   width: 470px;
   text-overflow: ellipsis;
@@ -337,7 +359,7 @@ a:link, a:visited {
 .essay-time {
   font-size: 14px;
   float: right;
-  background-color: cadetblue;
+  /* background-color: cadetblue; */
   line-height: 23px;
   padding-right: 5px;
 }
@@ -346,8 +368,9 @@ a:link, a:visited {
 /* 视频 */
 .video {
   height: 580px;
-  background-color: beige;
+  /* background-color: beige; */
   display: flex;
+  background: #fff url(../image/bg_videos.png) no-repeat center top;
 }
 .video-c {
   width: 1200px;
@@ -588,11 +611,17 @@ a:link, a:visited {
   .header {
     margin: 0 auto;
   }
+  .header-left {
+    background: #710a53;
+    width: 100%;
+    height: 105px;
+}
   .header-logo {
     max-width: 100%;
     height: 65px;
     margin-top: 20px;
     margin-left: 7px;
+    object-fit: contain;
   }
   .header-links {
     position: absolute;
@@ -600,10 +629,16 @@ a:link, a:visited {
     right: 0;
     width: 100%;
     text-align: right;
-  }
-  .header-links {
+    background: #ccc;
     border-radius: 0;
-}
+  }
+  .header-link-li {
+    margin-inline: 2px;
+  }
+  .header-link-li-a, .header-link-li-span {
+    color: #333;
+    font-size: 13px;
+  }
   .header-nav {
     display: none;
   }
@@ -618,7 +653,7 @@ a:link, a:visited {
     list-style: none;
     padding: 0;
     margin: 0;
-    background-color: aqua;
+    background: #d8d8d8;
     font-size: 16px;
     height: 35px;
     line-height: 35px;
@@ -626,6 +661,9 @@ a:link, a:visited {
   .header-mobilenav-li {
     display: inline-block;
     margin-inline: 7px;
+  }
+  .header-mobilenav-a {
+    color: #822e69;
   }
   .center-toc {
     display: none;
