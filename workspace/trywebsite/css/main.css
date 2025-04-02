@@ -28,7 +28,6 @@ a:link, a:visited {
   width: 1200px;
   height: 135px;
   margin: 0 auto;
-  /* background-color: red; */
   position: absolute;
   z-index: 2;
   margin-left: calc(100vw / 2 - 600px);
@@ -61,7 +60,6 @@ a:link, a:visited {
   border-radius: 100px;
 }
 .header-links-ul {
-  /* background-color: red; */
   padding: 0;
 }
 .header-link-li {
@@ -75,7 +73,6 @@ a:link, a:visited {
 }
 
 .header-nav {
-  /* background: yellow; */
   height: 50px;
   margin-top: calc(35px + 10px);
   font-size: 18px;
@@ -182,7 +179,6 @@ a:link, a:visited {
   margin: 0 auto;
 }
 .news-toc {
-  /* background-color: pink; */
   text-align: center;
   margin-top: 55px;
   margin-bottom: 52px;
@@ -192,7 +188,6 @@ a:link, a:visited {
   margin-inline: 25px;
 }
 .news-lastest-c {
-  /* background-color: red; */
   width: 340px;
   height: 387px;
   float: left;
@@ -228,7 +223,6 @@ a:link, a:visited {
 }
 
 .news-lastest-title {
-  /* background-color: yellow; */
   height: 85px;
   padding: 15px;
   font-size: 18px;
@@ -236,7 +230,6 @@ a:link, a:visited {
 }
 .news-lastest-time {
   font-size: 16px;
-  /* background-color: aqua; */
   padding: 15px 0 0 25px;
   color: #710a53;
 }
@@ -265,7 +258,6 @@ a:link, a:visited {
   margin-top: 3px;
 }
 .lastest-three-title {
-  /* background-color: #999; */
   float: right;
   width: 374px;
   font-size: 16px;
@@ -279,7 +271,6 @@ a:link, a:visited {
 
 /* 系列专题 */
 .special-series {
-  /* background-color: red; */
   background: #fff url(../image/bg_specials.jpg) repeat center top;
   height: 375px;
   display: flex;
@@ -289,7 +280,6 @@ a:link, a:visited {
   width: 1200px;
 }
 .series-title {
-  /* background-color: bisque; */
   color: #fff;
   margin-top: 55px;
   text-align: center;
@@ -325,23 +315,19 @@ a:link, a:visited {
 /* 文章 */
 .essay {
   height: 600px;
-  /* background-color: slver; */
   display: flex;
 }
 .essay-c {
   width: 1200px;
   margin: 0 auto;
-  /* background-color: aqua; */
 }
 .essay-leftimg {
-  /* background-color: beige; */
   height: 420px;
   width: 585px;
   margin-top: 100px;
   float: left;
 }
 .essay-class-name {
-  /* background-color: yellow; */
   width: 600px;
   height: 420px;
   float: left;
@@ -350,7 +336,6 @@ a:link, a:visited {
   left: 15px;
 }
 .essay-leftimg {
-  /* background-color: beige; */
   height: 420px;
   width: 570px;
   margin-top: 100px;
@@ -363,7 +348,6 @@ a:link, a:visited {
   object-fit: cover;
 }
 .essay-toc-ul {
-  /* background-color: #e88; */
   padding: 0;
   margin: 0;
   padding-left: 20px;
@@ -380,7 +364,6 @@ a:link, a:visited {
 .essay-title {
   color: #444;
   font-size: 20px;
-  /* background-color: beige; */
   display: block;
   width: 470px;
   text-overflow: ellipsis;
@@ -397,7 +380,6 @@ a:link, a:visited {
 .essay-time {
   font-size: 14px;
   float: right;
-  /* background-color: cadetblue; */
   line-height: 23px;
   padding-right: 5px;
 }
@@ -406,17 +388,14 @@ a:link, a:visited {
 /* 视频 */
 .video {
   height: 580px;
-  /* background-color: beige; */
   display: flex;
   background: #fff url(../image/bg_videos.png) repeat center top;
 }
 .video-c {
   width: 1200px;
   margin: 0 auto;
-  /* background-color: aliceblue; */
 }
 .video-cardname {
-  /* background-color: hotpink; */
   margin-top: 50px;
   font-size: 28px;
   text-align: center;
@@ -438,7 +417,6 @@ a:link, a:visited {
   margin-left: 40px;
 }
 .video-videoimage {
-  /* background-color: azure; */
   display: block;
   width: 330px;
   height: 220px;
@@ -454,7 +432,6 @@ a:link, a:visited {
 }
 .video-videotitle {
   display: block;
-  /* background-color: beige; */
   text-align: center;
   margin-top: 20px;
   font-size: 18px;
@@ -464,15 +441,12 @@ a:link, a:visited {
 /* 图式链接 */
 .imagelinks {
   height: 220px;
-  /* background-color: red; */
 }
 .imagelinks-c {
   width: 1200px;
   margin: 0 auto;
-  /* background-color: coral; */
 }
 .imagelinks-card {
-  /* background-color: azure; */
   width: 196px;
   display: inline-block;
   /* outline: solid; */
@@ -501,7 +475,6 @@ a:link, a:visited {
 .footer {
   color: rgba(255, 255, 255, 0.6);
   /* height: 273px; */
-  /* background-color: aqua; */
   display: flex;
   background: #8d3a74 url(../image/bg_footer.jpg) no-repeat center top;
   }
@@ -511,11 +484,9 @@ a:link, a:visited {
 .footer-c {
   width: 1200px;
   margin: 0 auto;
-  /* background-color: beige; */
 }
 .footer-simplenav {
   height: 75px;
-  /* background-color: violet; */
 }
 .footer-simplenav-ul {
   font-size: 16px;
@@ -532,14 +503,10 @@ a:link, a:visited {
 }
 .footer-links {
   height: 90px;
-  /* background-color: azure; */
   margin-top: 35px;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-}
-.footer-links div {
-  /* background-color: coral; */
 }
 .footer-logo {
   width: 270px;
@@ -569,7 +536,6 @@ a:link, a:visited {
 }
 .footer-social-logo {
   height: 40px;
-  /* background-color: violet !important; */
   width: 40px;
   display: inline-block;
 }
@@ -584,7 +550,6 @@ a:link, a:visited {
 }
 .footer-icp {
   height: 30px;
-  /* background-color: yellow; */
   margin-top: 2px;
   line-height: 30px;
   text-align: center;
