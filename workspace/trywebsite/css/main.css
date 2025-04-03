@@ -549,7 +549,7 @@ a:link, a:visited {
   margin-left: -15px;
 }
 .footer-icp {
-  height: 30px;
+  height: 70px;
   margin-top: 2px;
   line-height: 30px;
   text-align: center;
@@ -571,6 +571,9 @@ a:link, a:visited {
   .center-toc-a {
     width: 89px;
   }
+  .news {
+    display: block;
+  }
   .news-lastest > .news-lastest-c:not(:first-child) {
     margin-left: 25px;
   }
@@ -587,7 +590,7 @@ a:link, a:visited {
   }
   .essay-leftimg {
     width: 500px;
-    margin-right: 30px;
+    margin-right: 10px;
   }
   .essay-class-name {
     width: 470px;
