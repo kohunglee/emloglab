@@ -130,6 +130,17 @@ function delAlert2(msg, text, actionClosure, btnText = '删除') {
     });
 }
 
+function changeAuthorAlert() {
+    layer.prompt({
+        title: '输入新的作者ID',
+        formType: 0 // 单行输入框
+    }, function(value, index) {
+        $('#author').val(value); // 将输入的作者ID设置到隐藏的输入框中
+        changeAuthor(); // 调用更改作者的函数
+        layer.close(index);
+    });
+}
+
 function delArticle(msg, text, url, token) {
     layer.confirm(text, {
         title: msg,
@@ -515,7 +526,7 @@ function checkUpdate() {
 
     $.get("./upgrade.php?action=check_update", function (result) {
         if (result.code === 1001) {
-            rep_msg = "您的emlog pro尚未注册，<a href=\"auth.php\">去注册</a>";
+            rep_msg = "您的emlog尚未注册，<a href=\"auth.php\">去注册</a>";
         } else if (result.code === 1002) {
             rep_msg = "已经是最新版本";
         } else if (result.code === 200) {
@@ -614,12 +625,11 @@ $(function () {
         e.preventDefault();
         let link = $(this);
         let down_url = link.data('url');
-        let cdn_down_url = link.data('cdn-url');
         let type = link.data('type');
         link.text('安装中…');
         link.parent().prev(".installMsg").html("").addClass("spinner-border text-primary");
 
-        let url = './store.php?action=install&type=' + type + '&source=' + down_url + '&cdn_source=' + cdn_down_url;
+        let url = './store.php?action=install&type=' + type + '&source=' + down_url;
         $.get(url, function (data) {
             link.text('免费安装');
             link.parent().prev(".installMsg").html('<span class="text-danger">' + data + '</span>').removeClass("spinner-border text-primary");

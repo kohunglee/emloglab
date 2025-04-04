@@ -47,34 +47,14 @@ const TPLS_PATH = EMLOG_ROOT . '/content/templates/';
 const PLUGIN_URL = BLOG_URL . 'content/plugins/';
 const PLUGIN_PATH = EMLOG_ROOT . '/content/plugins/';
 
-
-/* 个人添加的代码，根据 cookie 能切换 template */
-$_tem = Option::get('nonce_templet');
-$varGet_name = Input::getStrVar('tlpcall', 0);
-if(!empty($varGet_name)){
-    $_tem = $varGet_name;
-    setcookie(
-        'templates_cookie',
-        $varGet_name,
-        time() + 3600,
-        '/'
-    );   
-} else {
-    if (!empty($_COOKIE['templates_cookie'])) {
-        $cookieValue = $_COOKIE['templates_cookie'];
-        $_tem = htmlspecialchars($cookieValue);
-    }
-}
-/* 个人代码添加完毕 */
-
 //站点URL
 define('DYNAMIC_BLOGURL', Option::get('blogurl'));
 //当前模板的URL
-define('TEMPLATE_URL', TPLS_URL . $_tem . '/');
+define('TEMPLATE_URL', TPLS_URL . Option::get('nonce_templet') . '/');
 //后台模板的绝对路径
 define('ADMIN_TEMPLATE_PATH', EMLOG_ROOT . '/admin/views/');
 //前台模板的绝对路径
-define('TEMPLATE_PATH', TPLS_PATH . $_tem . '/');
+define('TEMPLATE_PATH', TPLS_PATH . Option::get('nonce_templet') . '/');
 
 const MSGCODE_EMKEY_INVALID = 1001;
 const MSGCODE_NO_UPUPDATE = 1002;
