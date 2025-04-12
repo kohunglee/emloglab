@@ -1,0 +1,28 @@
+<button onclick="toggleSound()">切换声音（播放/停止）</button>
+
+<script>
+let audioCtx = null;
+let oscillator = null;
+
+function toggleSoundz(soundhz) {
+    if (!audioCtx) {
+        // 初始化AudioContext
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+    }
+
+    if (!oscillator) {
+        // 创建振荡器并播放
+        oscillator = audioCtx.createOscillator();
+        oscillator.type = 'sine';      // 正弦波
+        oscillator.frequency.setValueAtTime(soundhz, audioCtx.currentTime); // 600Hz
+        oscillator.connect(audioCtx.destination);
+        oscillator.start();
+    } else {
+        // 停止并重置
+        oscillator.stop();
+        oscillator.disconnect();
+        oscillator = null;
+    }
+}
+</script>
