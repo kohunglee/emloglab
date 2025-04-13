@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEST</title>
+</head>
+<body>
+    <style>
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+
+    <div style="width: 470px;">
+        <textarea name="code" id="htmlcode" style="width: 100%;height: 250px;padding: 0;background-color: azure; border: 0; outline: 0;"></textarea><br>
+        <button id="runhtml" style="float: right;background-color: antiquewhite;border: 0;width: 100px;height: 50px;font-size: 22px;padding: 0;">run</button>
+        <details>
+            <summary style="cursor: pointer;background-color: cornsilk;width: fit-content;">CSS + JS<div id="res_info" style=" display: inline; margin-left: 10px; background-color: white; padding-left: 10px; "></div></summary>
+            css <br>
+            <textarea name="code" id="csscode" style="width: 100%;height: 250px;padding: 0;background-color: azure; border: 0; outline: 0;"></textarea><br>
+            js <br>
+            <textarea name="code" id="jscode" style="width:100%;height:250px;padding: 0;background-color: azure; border: 0; outline: 0;"></textarea>
+        </details>
+        
+    </div>
+
+    <script>
+        // 浏览器运行后检测本地 storage
+        const codeData = (JSON.parse(localStorage.getItem('codeData'))) || false;
+        if(codeData){
+            htmlcode.value = codeData.htmlcode;
+            csscode.value = codeData.csscode;
+            jscode.value = codeData.jscode;
+        }
+
+        // 点击事件
+        runhtml.onclick = function(){
+            let testBlob;
+            if(csscode.value || jscode.value){
+                testBlob = new Blob([`<meta charset="utf-8">` + `<style>` + csscode.value + `</style>` + htmlcode.value + `<script>` + jscode.value + `</sc` + `ript>`], {type: 'text/html'});
+            } else {
+                testBlob = new Blob([`<meta charset="utf-8">` + htmlcode.value], {type: 'text/html'});
+            }
+            window.open(window.URL.createObjectURL(testBlob), '_blank');
+        }
+
+        // 按下保存快捷键后
+        document.addEventListener('keydown', function(e){  // 保存快捷键
+		if (e.keyCode == 83 && (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)){
+			e.preventDefault();
+            const codeContent = {
+                htmlcode: htmlcode.value,
+                csscode: csscode.value,
+                jscode: jscode.value
+            };
+            localStorage.setItem('codeData', JSON.stringify(codeContent));
+            res_info.innerHTML = "<span style='animation: fadeOut 3s forwards; opacity: 1;'>已暂存</span>";
+		}
+	});
+    </script>
+</body>
+</html>
