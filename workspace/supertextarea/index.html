@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>轻量级代码编辑器</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .editor-container {
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        #code-editor {
+            width: 100%;
+            height: 300px;
+            padding: 10px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            tab-size: 4;
+            white-space: pre;
+            overflow-x: auto;
+        }
+        
+        .status-bar {
+            background-color: #f0f0f0;
+            padding: 5px 10px;
+            font-size: 12px;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <textarea id="code-editor" placeholder="输入代码..."></textarea>
+        <div class="status-bar">轻量级代码编辑器 | 按Tab键缩进 | 自动括号保持</div>
+    </div>
+
+    <script>
+
+        function detectFirstIndent(fileContent) {
+            const lines = fileContent.split('\n');
+            for (const line of lines) {
+                if (line.length > 0 && /^\s/.test(line)) {
+                    const indent = line.match(/^\s+/)[0];
+                    const type = indent.includes('\t') ? 'tab' : 'space';
+                    const count = (type === 'tab') ? 1 : indent.length ;
+                    return { type: type, count: count };
+                }
+            }
+            return { type: 'tab', count: 1 };
+        }
+
+        function removeLeadingSpaces(str, n) {
+            const regex = new RegExp(`^([ \\t]{0,${n}})`);
+            return str.replace(regex, '');
+        }
+
+        function spaceFrontLen(str){
+            const regex = new RegExp(`^([ \\t]{0,${n}})`);
+            return str.match(regex).length;
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const editor = document.getElementById('code-editor');
+
+            // 初始示例代码
+            editor.value = 
+`function example() {
+    if (true) {
+      console.log("Hello, world!");
+      const arr = [1, 2, 3];
+    }
+}`;
+
+            
+            const indentType = detectFirstIndent(editor.value);
+            const tabChar = (indentType.type === 'tab') ? '\t' : Array(indentType.count + 1).join(' ');
+            const tabLength = indentType.count;
+
+            // 智能缩进与括号保持
+            editor.addEventListener('keydown', function(e) {
+                // Tab键处理
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    
+                    const start = this.selectionStart;
+                    const end = this.selectionEnd;
+                    if(start === end){
+                        this.value = this.value.substring(0, start) + tabChar + this.value.substring(end);
+                        this.selectionStart = this.selectionEnd = start + tabLength;
+                        return;
+                    } else {
+                        const contentArr = this.value.split('\n');
+                        startLine = (this.value.substring(0, start).match(/\n/g) || []).length;
+                        endLine = (this.value.substring(0, end).match(/\n/g) || []).length;
+                        if(event.shiftKey){
+                            for (let i = startLine; i <= endLine; i++) {
+                                contentArr[i] = removeLeadingSpaces(contentArr[i], tabLength);
+                            }
+                            this.value = contentArr.join('\n');
+                            const _start = 
+                            this.selectionStart = _start;
+                            this.selectionEnd = end + tabLength * ((startLine === endLine) ? 1 : (endLine - startLine + 1) );
+                        } else{
+                            for (let i = startLine; i <= endLine; i++) {
+                                contentArr[i] = tabChar + contentArr[i];
+                            }
+                            this.value = contentArr.join('\n');
+                            this.selectionStart = start + tabLength;
+                            this.selectionEnd = end + tabLength * ((startLine === endLine) ? 1 : (endLine - startLine + 1) );
+                        }
+                            
+                    }
+
+                }
+                
+                // 回车键处理
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const start = this.selectionStart;
+                    const end = this.selectionEnd;
+                    const value = this.value;
+                    
+                    // 获取当前行缩进
+                    const lineStart = value.lastIndexOf('\n', start - 1) + 1;
+                    const currentLine = value.substring(lineStart, start);
+                    const indent = currentLine.match(/^\s*/)[0];
+                    
+                    // 检查是否需要添加闭合括号
+                    const pairs = {'{': '}', '[': ']', '(': ')'};
+                    const lastChar = currentLine.trim().slice(-1);
+                    const nextChar = value.substring(start, start + 1);
+                    
+                    let newText;
+                    
+                    // 如果当前字符是开括号且下一个字符是闭括号
+                    if (pairs[lastChar] && nextChar === pairs[lastChar]) {
+                        newText = '\n' + indent + tabChar + '\n' + indent;
+                        this.value = value.substring(0, start) + newText + value.substring(end);
+                        this.selectionStart = this.selectionEnd = start + indent.length + 1 + tabLength;
+                    } else {
+                        newText = '\n' + indent;
+                        this.value = value.substring(0, start) + newText + value.substring(end);
+                        this.selectionStart = this.selectionEnd = start + newText.length;
+                    }
+
+                    return;
+                }
+                
+                // 自动补全括号
+                const autoPairs = {'{': '}',   '[': ']',   '(': ')',   '"': '"',   "'": "'",   '`': '`'};
+                if (['{', '(', '[', '"', "'", '`', ']', '}', ')', ].includes(e.key) && this.selectionStart === this.selectionEnd) {
+                    e.preventDefault();
+                    const start = this.selectionStart;
+                    const pairChar = autoPairs[e.key];
+                    if ( ['"', "'", '`', ']', '}', ')', ].includes(e.key) && this.value.charAt(start) === e.key) {  // 特殊处理符号（如果下一个字符已经是指定字符则不插入）
+                        this.selectionStart = this.selectionEnd = start + 1;
+                        return;
+                    }
+                    this.value = this.value.substring(0, start) + e.key + pairChar + this.value.substring(start);
+                    this.selectionStart = this.selectionEnd = start + 1;
+                }
+            });
+        });
+            
+    </script>
+</body>
+</html>
