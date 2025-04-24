@@ -54,72 +54,75 @@
 
     <script>
 
-        function detectFirstIndent(fileContent) {
-            const lines = fileContent.split('\n');
-            for (const line of lines) {
-                if (line.length > 0 && /^\s/.test(line)) {
-                    const indent = line.match(/^\s+/)[0];
-                    const type = indent.includes('\t') ? 'tab' : 'space';
-                    const count = (type === 'tab') ? 1 : indent.length ;
-                    return { type: type, count: count };
-                }
-            }
-            return { type: 'tab', count: 1 };
-        }
 
-        function removeLeadingSpaces(str, n) {
-            const regex = new RegExp(`^([ \\t]{0,${n}})`);
-            return str.replace(regex, '');
-        }
-
-        function spaceFrontLen(str){
-            const regex = new RegExp(`^([ \\t]{0,${n}})`);
-            return str.match(regex).length;
-        }
-
-
-        document.addEventListener('DOMContentLoaded', function() {
-            const editor = document.getElementById('code-editor');
 
             // 初始示例代码
-            editor.value = 
+            document.getElementById('code-editor').value = 
 `function example() {
     if (true) {
-      console.log("Hello, world!");
-      const arr = [1, 2, 3];
+        console.log("Hello, world!");
+        const arr = [1, 2, 3];
     }
 }`;
 
+        document.addEventListener('DOMContentLoaded', function() {
             
+
+            const detectFirstIndent = (fileContent) => {  // 获取该文档的第一个缩进
+                const lines = fileContent.split('\n');
+                for (const line of lines) {
+                    if (line.length > 0 && /^\s/.test(line)) {
+                        const indent = line.match(/^\s+/)[0];
+                        const type = indent.includes('\t') ? 'tab' : 'space';
+                        const count = (type === 'tab') ? 1 : indent.length ;
+                        return { type: type, count: count };
+                    }
+                }
+                return { type: 'space', count: 4 };  // 默认缩进是 4 个空格
+            }
+
+            const removeLeadingSpaces = (str, n) => {  // 删去文本字符串前面缩进部分的几个字符数量
+                const regex = new RegExp(`^([ \\t]{0,${n}})`);
+                return str.replace(regex, '');
+            }
+
+            const arrSum = (a,n,s=0) => (a.slice(0,n).map(x=>s+=x.length),s);  // 此函数可计算字符串数组前 n 字符 length 之和
+
+            const editor = document.getElementById('code-editor');
             const indentType = detectFirstIndent(editor.value);
             const tabChar = (indentType.type === 'tab') ? '\t' : Array(indentType.count + 1).join(' ');
             const tabLength = indentType.count;
 
-            // 智能缩进与括号保持
+            // 缩进与括号保持
             editor.addEventListener('keydown', function(e) {
-                // Tab键处理
+
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+
                 if (e.key === 'Tab') {
                     e.preventDefault();
-                    
-                    const start = this.selectionStart;
-                    const end = this.selectionEnd;
-                    if(start === end){
+
+                    if(start === end){  // 光标未选中任何字符
                         this.value = this.value.substring(0, start) + tabChar + this.value.substring(end);
                         this.selectionStart = this.selectionEnd = start + tabLength;
                         return;
                     } else {
                         const contentArr = this.value.split('\n');
+                        const contentArrOriginal = this.value.split('\n');
                         startLine = (this.value.substring(0, start).match(/\n/g) || []).length;
                         endLine = (this.value.substring(0, end).match(/\n/g) || []).length;
-                        if(event.shiftKey){
+                        if(event.shiftKey){  // 如果按下了 shift（删去缩进）
                             for (let i = startLine; i <= endLine; i++) {
                                 contentArr[i] = removeLeadingSpaces(contentArr[i], tabLength);
                             }
                             this.value = contentArr.join('\n');
-                            const _start = 
-                            this.selectionStart = _start;
-                            this.selectionEnd = end + tabLength * ((startLine === endLine) ? 1 : (endLine - startLine + 1) );
-                        } else{
+                            const lengthDiff = contentArrOriginal[startLine].length - contentArrOriginal[startLine].trimStart().length;  // start 所在行有多少缩进
+                            const moveLength = Math.min(tabLength, lengthDiff);
+                            const limitLineNum = arrSum(contentArr, startLine);  // 计算 start 能减小到的最小值，比如防止start在开始时是在第5行，在删去缩进后，变到了第四行
+                            const startPoint = (limitLineNum > (start - moveLength - startLine)) ? (limitLineNum + startLine) : (start - moveLength);  // 兼容选择框起点选在了缩进处（也就是空格上）的情况
+                            this.selectionStart = (lengthDiff > 0) ? startPoint : start;
+                            this.selectionEnd = end - (contentArrOriginal.join('\n').length - this.value.length);
+                        } else{  // 只按下了 tab（增加缩进）
                             for (let i = startLine; i <= endLine; i++) {
                                 contentArr[i] = tabChar + contentArr[i];
                             }
@@ -131,29 +134,29 @@
                     }
 
                 }
+
+                // 删除键处理
+                if (e.key === 'Backspace') {
+                    e.preventDefault();
+                }
                 
                 // 回车键处理
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    const start = this.selectionStart;
-                    const end = this.selectionEnd;
                     const value = this.value;
-                    
-                    // 获取当前行缩进
                     const lineStart = value.lastIndexOf('\n', start - 1) + 1;
                     const currentLine = value.substring(lineStart, start);
                     const indent = currentLine.match(/^\s*/)[0];
-                    
-                    // 检查是否需要添加闭合括号
                     const pairs = {'{': '}', '[': ']', '(': ')'};
                     const lastChar = currentLine.trim().slice(-1);
                     const nextChar = value.substring(start, start + 1);
-                    
                     let newText;
-                    
-                    // 如果当前字符是开括号且下一个字符是闭括号
-                    if (pairs[lastChar] && nextChar === pairs[lastChar]) {
-                        newText = '\n' + indent + tabChar + '\n' + indent;
+                    if (pairs[lastChar]) {  // 如果当前字符是开括号
+                        if(nextChar === pairs[lastChar]){  // 下一个字符是闭括号
+                            newText = '\n' + indent + tabChar + '\n' + indent;
+                        } else{
+                            newText = '\n' + indent + tabChar;
+                        }
                         this.value = value.substring(0, start) + newText + value.substring(end);
                         this.selectionStart = this.selectionEnd = start + indent.length + 1 + tabLength;
                     } else {
@@ -161,7 +164,6 @@
                         this.value = value.substring(0, start) + newText + value.substring(end);
                         this.selectionStart = this.selectionEnd = start + newText.length;
                     }
-
                     return;
                 }
                 
@@ -169,7 +171,6 @@
                 const autoPairs = {'{': '}',   '[': ']',   '(': ')',   '"': '"',   "'": "'",   '`': '`'};
                 if (['{', '(', '[', '"', "'", '`', ']', '}', ')', ].includes(e.key) && this.selectionStart === this.selectionEnd) {
                     e.preventDefault();
-                    const start = this.selectionStart;
                     const pairChar = autoPairs[e.key];
                     if ( ['"', "'", '`', ']', '}', ')', ].includes(e.key) && this.value.charAt(start) === e.key) {  // 特殊处理符号（如果下一个字符已经是指定字符则不插入）
                         this.selectionStart = this.selectionEnd = start + 1;

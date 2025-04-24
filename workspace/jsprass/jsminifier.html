@@ -2,7 +2,7 @@
 <!-- saved from url=(0042)https://skalman.github.io/UglifyJS-online/ -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	
-	<title>UglifyJS 3: Online JavaScript minifier</title>
+	<title>UglifyJS 3: 在线压缩 js</title>
 	<!--
 		Wrapper created by Dan Wolff (danwolff.se)
 		This wrapper is in the public domain. Attribution not required but appreciated.
@@ -12,7 +12,7 @@
 	 -->
 
 	<link rel="shortcut icon" href="https://skalman.github.io/UglifyJS-online/favicon.ico">
-	<link rel="stylesheet" href="./test/style.css">
+	<link rel="stylesheet" href="./min/style.css">
 <style data-id="immersive-translate-input-injected-css">.immersive-translate-input {
   position: absolute;
   top: 0;
@@ -407,171 +407,168 @@
 <body class="s-input s-info">
 
 <div class="header">
-	<h1><a id="header-link" href="https://skalman.github.io/UglifyJS-online/">UglifyJS 3: Online JavaScript minifier</a></h1>
+	<h1><a id="header-link" href="https://skalman.github.io/UglifyJS-online/">UglifyJS 3: 在线压缩 js</a></h1>
 </div>
 
 
 <div class="content">
 	<div class="col i i-input">
-<textarea id="in" rows="15" cols="80" spellcheck="false" tabindex="1" autofocus="">// Your code goes here
+<textarea id="in" rows="15" cols="80" spellcheck="false" tabindex="1" autofocus="">// 在此处写您的代码...
 
 
 </textarea>
 		<div class="tools">
-			<button class="btn-main pull-right" id="btn-go" tabindex="1">Minify</button>
-			<button id="btn-options" tabindex="2">Options</button>
-			<label><input id="cb-as-i-type" type="checkbox" checked=""> As I type</label>
+			<button class="btn-main pull-right" id="btn-go" tabindex="1">压缩</button>
+			<button id="btn-options" tabindex="2">配置</button>
+			<label><input id="cb-as-i-type" type="checkbox" checked="">实时压缩</label>
 		</div>
 	</div>
 
 	<div class="col i i-options">
-<textarea id="options" rows="15" cols="80" spellcheck="false" tabindex="1">// Documentation of the options is available at https://github.com/mishoo/UglifyJS2
-{
-  parse: {
-    bare_returns     : false,
-    expression       : false,
-    filename         : null,
-    html5_comments   : true,
-    module           : false,
-    shebang          : true,
-    strict           : false,
-    toplevel         : null
-  },
-  compress: {
-    annotations      : true,
-    arguments        : true,
-    arrows           : true,
-    assignments      : true,
-    awaits           : true,
-    booleans         : true,
-    collapse_vars    : true,
-    comparisons      : true,
-    conditionals     : true,
-    dead_code        : true,
-    default_values   : true,
-    directives       : true,
-    drop_console     : false,
-    drop_debugger    : true,
-    evaluate         : true,
-    expression       : false,
-    functions        : true,
-    global_defs      : false,
-    hoist_exports    : true,
-    hoist_funs       : false,
-    hoist_props      : true,
-    hoist_vars       : false,
-    ie               : false,
-    if_return        : true,
-    imports          : true,
-    inline           : true,
-    join_vars        : true,
-    keep_fargs       : false,
-    keep_fnames      : false,
-    keep_infinity    : false,
-    loops            : true,
-    merge_vars       : true,
-    module           : false,
-    negate_iife      : true,
-    objects          : true,
-    optional_chains  : true,
-    passes           : 1,
-    properties       : true,
-    pure_funcs       : null,
-    pure_getters     : "strict",
-    reduce_funcs     : true,
-    reduce_vars      : true,
-    rests            : true,
-    sequences        : true,
-    side_effects     : true,
-    spreads          : true,
-    strings          : true,
-    switches         : true,
-    templates        : true,
-    top_retain       : null,
-    toplevel         : false,
-    typeofs          : true,
-    unsafe           : false,
-    unsafe_comps     : false,
-    unsafe_Function  : false,
-    unsafe_math      : false,
-    unsafe_proto     : false,
-    unsafe_regexp    : false,
-    unsafe_undefined : false,
-    unused           : true,
-    varify           : true,
-    webkit           : false,
-    yields           : true
-  },
-  mangle: {
-    eval             : false,
-    ie               : false,
-    keep_fargs       : false,
-    keep_fnames      : false,
-    properties       : false,
-    reserved         : [],
-    toplevel         : false,
-    v8               : false,
-    webkit           : false
-  },
-  output: {
-    annotations      : false,
-    ascii_only       : false,
-    beautify         : false,
-    braces           : false,
-    comments         : /@license|@preserve|^!/,
-    extendscript     : false,
-    galio            : false,
-    ie               : false,
-    indent_level     : 4,
-    indent_start     : 0,
-    inline_script    : true,
-    keep_quoted_props: false,
-    max_line_len     : false,
-    preamble         : null,
-    preserve_line    : false,
-    quote_keys       : false,
-    quote_style      : 0,
-    semicolons       : true,
-    shebang          : true,
-    source_map       : null,
-    v8               : false,
-    webkit           : false,
-    width            : 80,
-    wrap_iife        : false
-  },
-  wrap: false
-}
+<textarea id="options" rows="15" cols="80" spellcheck="false" tabindex="1">// 有关于配置的文档在此处： https://github.com/mishoo/UglifyJS2
+  {
+    parse: {  // 解析选项配置
+      bare_returns : false,  // 是否允许顶级return语句（不在函数内）不允许
+      expression : false,  // 是否解析为表达式而非程序（如JSON）
+      filename : null,  // 源文件名，用于错误报告
+      html5_comments : true,  // 是否保留HTML5风格注释（<!-- -->）
+      module : false,  // 是否解析为ES模块
+      shebang : true,  // 是否保留shebang（#!/usr/bin/env node）
+      strict : false,  // 是否在解析时自动添加"use strict"
+      toplevel : null  // 顶级AST节点，高级用法
+    },
+    compress: {  // 压缩选项配置
+      annotations : true,  // 是否保留/压缩注解（如Angular的）
+      arguments : true,  // 是否优化arguments对象访问
+      arrows : true,  // 是否压缩箭头函数
+      assignments : true,  // 是否优化赋值操作
+      awaits : true,  // 是否优化await表达式
+      booleans : true,  // 是否优化布尔运算（如!!a → a）
+      collapse_vars : true,  // 是否合并重复变量声明
+      comparisons : true,  // 是否优化比较运算（如!(a <= b) → a > b）
+      conditionals : true,  // 是否优化条件表达式
+      dead_code : true,  // 是否移除死代码
+      default_values : true,  // 是否优化默认值赋值（如a = void 0 → a = undefined）
+      directives : true,  // 是否压缩/保留指令（如"use strict"）
+      drop_console : false,  // 是否移除console.*调用
+      drop_debugger : true,  // 是否移除debugger语句
+      evaluate : true,  // 是否计算常量表达式（如1+2 → 3）
+      expression : false,  // 是否将顶级表达式转为返回语句（与parse.expression配合）
+      functions : true,  // 是否优化函数声明/表达式
+      global_defs : false,  // 全局变量替换定义（如{DEBUG: false}）
+      hoist_exports : true,  // 是否提升export声明
+      hoist_funs : false,  // 是否提升函数声明（可能增大代码体积）
+      hoist_props : true,  // 是否提升对象属性（如{a.x = 1} → var x = 1; a.x = x）
+      hoist_vars : false,  // 是否提升var声明（通常无益）
+      ie : false,  // 是否兼容IE8及以下（禁用某些优化）
+      if_return : true,  // 是否优化if-return组合（如if(x)return y → return x&&y）
+      imports : true,  // 是否优化import声明
+      inline : true,  // 是否内联函数/变量（压缩级别1）
+      join_vars : true,  // 是否合并连续var声明
+      keep_fargs : false,  // 是否保留函数参数名（禁用arguments优化）
+      keep_fnames : false,  // 是否保留函数名（对Function.prototype.name有影响）
+      keep_infinity : false,  // 是否保留Infinity（否则1/0 → Infinity）
+      loops : true,  // 是否优化循环（如while(1)→for(;;)）
+      merge_vars : true,  // 是否合并重复变量（如var a=1;var a=2 → var a=2）
+      module : false,  // 是否启用ES模块特定优化
+      negate_iife : true,  // 是否反转立即执行函数（!(function(){})() → (function(){}())）
+      objects : true,  // 是否优化对象属性访问（如{a:1} → {"a":1}）
+      optional_chains : true,  // 是否优化可选链（a?.b → a&&a.b）
+      passes : 1,  // 压缩遍历次数（更高更慢但可能更优），默认1
+      properties : true,  // 是否优化属性访问（如a["b"] → a.b）
+      pure_funcs : null,  // 纯函数列表（可安全移除的函数调用）
+      pure_getters : "strict",  // 是否假设属性访问无副作用（"strict"为保守模式），默认"strict"
+      reduce_funcs : true,  // 是否内联一次性函数
+      reduce_vars : true,  // 是否减少变量使用（常量传播等）
+      rests : true,  // 是否优化rest参数（...args）
+      sequences : true,  // 是否合并连续语句（用逗号运算符）
+      side_effects : true,  // 是否移除无副作用的表达式
+      spreads : true,  // 是否优化spread运算符（...arr）
+      strings : true,  // 是否优化字符串（如"a"+"b" → "ab"）
+      switches : true,  // 是否优化switch语句（合并case等）
+      templates : true,  // 是否优化模板字符串（如`a${b}c` → "a"+b+"c"）
+      top_retain : null,  // 要保留的顶级变量名列表
+      toplevel : false,  // 是否压缩顶级变量（可能影响全局变量）
+      typeofs : true,  // 是否优化typeof（如typeof a=="undefined" → a===void 0）
+      unsafe : false,  // 是否启用不安全优化（可能破坏代码逻辑）
+      unsafe_comps : false,  // 是否不安全优化比较（如a<=b → !(a>b)）
+      unsafe_Function : false,  // 是否压缩Function构造函数调用
+      unsafe_math : false,  // 是否不安全优化数学运算（如2*3 → 6）
+      unsafe_proto : false,  // 是否不安全优化__proto__（可能破坏原型链）
+      unsafe_regexp : false,  // 是否不安全优化正则（如/foo.*bar/ → /foo[^]*bar/）
+      unsafe_undefined : false,  // 是否用void 0替换undefined（非全局作用域）
+      unused : true,  // 是否移除未使用变量/函数
+      varify : true,  // 是否将const/let转为var（兼容旧浏览器）
+      webkit : false,  // 是否处理WebKit bug（如保留arguments.callee）
+      yields : true  // 是否优化yield表达式
+    },
+    mangle: {  // 混淆选项配置
+      eval : false,  // 是否混淆eval作用域内的变量
+      ie : false,  // 是否兼容IE8及以下（保留引号属性名）
+      keep_fargs : false,  // 是否保留函数参数名
+      keep_fnames : false,  // 是否保留函数名
+      properties : false,  // 是否混淆属性名（需配合mangle.properties配置）
+      reserved : [],  // 要保留的标识符列表，默认[]
+      toplevel : false,  // 是否混淆顶级变量
+      v8 : false,  // 是否保留Chrome/V8内部用法
+      webkit : false  // 是否保留Safari/WebKit内部用法
+    },
+    output: {  // 输出选项配置
+      annotations : false,  // 是否保留注解（如@license）
+      ascii_only : false,  // 是否转义非ASCII字符（如\u1234）
+      beautify : false,  // 是否美化输出（格式化代码）
+      braces : false,  // 是否始终添加大括号（if/for等）
+      comments : /@license|@preserve|^!/,  // 保留注释的正则（默认保留重要注释）
+      extendscript : false,  // 是否兼容ExtendScript（Adobe产品）
+      galio : false,  // 是否兼容Galio（特定JS引擎）
+      ie : false,  // 是否兼容IE（如保留catch(e)参数）
+      indent_level : 4,  // 缩进空格数（当beautify为true时），默认4
+      indent_start : 0,  // 初始缩进空格数，默认0
+      inline_script : true,  // 是否允许HTML注释中的JS代码（XSS相关）
+      keep_quoted_props: false,  // 是否保留引号属性名（如{"a":1}）
+      max_line_len : false,  // 最大行长度（false为不限制）
+      preamble : null,  // 文件前导文本（如版权声明）
+      preserve_line : false,  // 是否保留行号信息
+      quote_keys : false,  // 是否对所有属性名加引号（如{a:1}→{"a":1}）
+      quote_style : 0,  // 引号风格（0-自动，1-单引号，2-双引号，3-原始），默认0
+      semicolons : true,  // 是否使用分号结束语句
+      shebang : true,  // 是否保留shebang（#!/usr/bin/env node）
+      source_map : null,  // 源映射（SourceMap）配置
+      v8 : false,  // 是否输出V8兼容代码
+      webkit : false,  // 是否输出WebKit兼容代码
+      width : 80,  // 格式化代码时的行宽指导值，默认80
+      wrap_iife : false  // 是否包裹立即执行函数（如(function(){})()→(function(){}())）
+    },
+    wrap: false  // 是否包裹整个代码（防止变量泄漏）
+  }
+  
 </textarea>
 		<div class="tools">
-			<button class="btn-main" id="btn-options-save" tabindex="2">Save</button>
-			<button id="btn-options-reset" tabindex="2">Use defaults</button>
+			<button class="btn-main" id="btn-options-save" tabindex="2">保存</button>
+			<button id="btn-options-reset" tabindex="2">使用默认值</button>
 		</div>
 	</div>
 
 	<div class="col i i-info">
 		<p>
-			<strong>UglifyJS 3</strong> is an excellent tool to help you minify your JavaScript!
-			It's a tried and tested tool, used by libraries such as jQuery.</p>
+			<strong>UglifyJS 3</strong> 是一款出色的 JavaScript 压缩工具！它已久经验证，jQuery 等库也曾使用过它。</p>
 
 		<p>
-			This is a simple wrapper for the browser around the minifier;
-			the hard work is done by the Uglify team.
-			If you need an automated solution, I suggest checking out the
-			<a href="https://github.com/mishoo/UglifyJS2">source code</a>, intended for Node.JS.</p>
+			这是浏览器对压缩器的简单封装；核心工作由 Uglify 团队完成。如果您需要自动化解决方案，我建议您查看 Node.JS 的<a href="https://github.com/mishoo/UglifyJS2">源代码</a>。</p>
 
 		<p>
-			Do you want to help improve this tool? It's on <a href="https://github.com/Skalman/UglifyJS-online">Github</a>.</p>
+			你想帮助改进这个工具吗？它在 <a href="https://github.com/Skalman/UglifyJS-online">Github</a> 上。</p>
 
 		<p><small>
-			This wrapper for the browser was created by <a href="https://danwolff.se/">Dan Wolff</a>.
+			此浏览器包装器由 <a href="https://danwolff.se/">Dan Wolff</a> 创建。
 
-			Version <code id="version">uglify-js 3.19.0</code>.</small></p>
+			版本 <code id="version">uglify-js 3.19.0</code>.</small></p>
 
 	</div>
 
 	<div class="col i i-output">
 		<p>
-			The minified output (<span id="stats"></span>)</p>
+			压缩后的体积： (<span id="stats"></span>)</p>
 		<textarea id="out" spellcheck="false" tabindex="3"></textarea>
 	</div>
 
@@ -581,19 +578,6 @@
 </div>
 
 <script src="./min/uglifyjs.min.js"></script>
-
-<!-- <script src="./test/minify.js"></script>
-<script src="./test/utils.js"></script>
-<script src="./test/ast.js"></script>
-<script src="./test/parse.js"></script>
-<script src="./test/transform.js"></script>
-<script src="./test/scope.js"></script>
-<script src="./test/output.js"></script>
-<script src="./test/compress.js"></script>
-<script src="./test/propmangle.js"></script>
-<script src="./test/script.js"></script> -->
-
-
 
 </body><div id="immersive-translate-browser-popup" style="all: initial"><template shadowrootmode="open"><style>@charset "UTF-8";
 /*!
