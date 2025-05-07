@@ -87,7 +87,6 @@ W.sphere({g:"M", n:"head",size:0.6,y:0, z:0.6, rx:-90,ry:0, b:"ccc",s:1});   // 
 W.camera({g:"M",z:.5,y:-2.5,rx:90});  // 摄像机，此时它的 g 属性为主角 sphere 的 n 属性，摄像机与主角绑定
 
 /* -----------------------------[ 按键事件 ]----------------------------------------- */
-
 keys = {  // 操作值
   viewForward:0,
   viewBackward:0,
@@ -132,37 +131,21 @@ onkeyup = e => handleKey(e, 0);
 
 /* -----------------------------[ 视角变化 ]----------------------------------------- */
 function viewChangeAction(){
-  if(keys.viewForward || keys.viewBackward) {  // 前后平移
-    W.move({n:"M", z: Z += (-keys.viewForward + keys.viewBackward) * Math.cos(RY*Math.PI/180) / 10,
-                    x: X += (-keys.viewForward + keys.viewBackward) * Math.sin(RY*Math.PI/180) / 10
-    });
-  }
-  if(keys.viewLeft || keys.viewRight) {  // 左右平移
-    W.move({n:"M", z: Z += (-keys.viewLeft + keys.viewRight) * Math.cos((RY + 90)*Math.PI/180) / 10,
-                    x: X += (-keys.viewLeft + keys.viewRight) * Math.sin((RY + 90)*Math.PI/180) / 10
-    });
-  }
-  if(keys.viewUp || keys.viewDown) {  // 上下平移
-    var _number = (keys.viewUp - keys.viewDown) / 7;
-    Y += _number;
-    W.move({n:"M", y: Y});
-  }
-  if(keys.turnRight || keys.turnLeft) {  // 左右扭动
-    var offset = (-keys.turnRight + keys.turnLeft);
-    if(Math.abs(offset) > 0.1){
-        RY += offset;
-        W.move({n:"M", ry: RY});
-    }
-  }
-  if(keys.turnUp || keys.turnDown) {  // 上下扭动
-    var offset = (-keys.turnUp + keys.turnDown);
-    if(Math.abs(offset) > 0.5){
-      if ((offset > 0 && RX < 0) || (offset < 0 && RX > -180)) {
-        RX += offset;
-      }
-    }
-    W.move({ n: "M", rx: RX });  
-  }
+    var calMMove = calMovePara(X, Y, Z, RX, RY, RZ);
+    Y = calMMove.y;
+    X = calMMove.x;
+    Z = calMMove.z;
+    RX = calMMove.rx;
+    RY = calMMove.ry;
+    RZ = calMMove.rz;
+    W.move({    n: "M", 
+                x: X,
+                y: Y,
+                z: Z,
+                rx: RX,
+                ry: RY,
+                rz: RZ
+            });
 }
 
 /* -----------------------------[ 函数，计算移动变化 ]----------------------------------------- */
@@ -172,20 +155,17 @@ function calMovePara(X, Y, Z, RX, RY, RZ){
     X += (-keys.viewForward + keys.viewBackward) * Math.sin(RY*Math.PI/180) / 10;
   }
   if(keys.viewLeft || keys.viewRight) {  // 左右平移
-    W.move({n:"M", z: Z += (-keys.viewLeft + keys.viewRight) * Math.cos((RY + 90)*Math.PI/180) / 10,
-                    x: X += (-keys.viewLeft + keys.viewRight) * Math.sin((RY + 90)*Math.PI/180) / 10
-    });
+    Z += (-keys.viewLeft + keys.viewRight) * Math.cos((RY + 90)*Math.PI/180) / 10;
+    X += (-keys.viewLeft + keys.viewRight) * Math.sin((RY + 90)*Math.PI/180) / 10;
   }
   if(keys.viewUp || keys.viewDown) {  // 上下平移
-    var _number = (keys.viewUp - keys.viewDown) / 7;
-    Y += _number;
-    W.move({n:"M", y: Y});
+    var offset = (keys.viewUp - keys.viewDown) / 7;
+    Y += offset;
   }
   if(keys.turnRight || keys.turnLeft) {  // 左右扭动
     var offset = (-keys.turnRight + keys.turnLeft);
     if(Math.abs(offset) > 0.1){
         RY += offset;
-        W.move({n:"M", ry: RY});
     }
   }
   if(keys.turnUp || keys.turnDown) {  // 上下扭动
@@ -195,8 +175,8 @@ function calMovePara(X, Y, Z, RX, RY, RZ){
         RX += offset;
       }
     }
-    W.move({ n: "M", rx: RX });  
   }
+  return {x: X, y: Y, z: Z, rx: RX, ry: RY, rz:RZ}
 }
 
 /* -----------------------------[ Pointer Lock 和鼠标移动事件 ]----------------------------------------- */
@@ -241,7 +221,7 @@ function cannonAni(){
 /* -----------------------------[ 帧运行 ]----------------------------------------- */
 function animate() {
   requestAnimationFrame(animate);
-  viewChangeAction();  // 改变视角
+  viewChangeAction();  // 鼠标视角变化
   cannonAni();  // 物理世界
 }
 animate();
