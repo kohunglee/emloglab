@@ -1,29 +1,31 @@
 <style>body{margin: 0;}</style>
 <script src="https://img1.ccgxk.com/wjs/w.js"></script>
 <script src="https://img1.ccgxk.com/jscdn/cannon.min.js"></script>
+<script src="https://xem.github.io/W/demos/mariotexture.js"></script>
 <canvas id=c width=320 height=300></canvas>
 <script>
 
 /* -----------------------------[ 变量区 ]----------------------------------------- */
 // 这些是主角的初始位置
 var X = 7.2, Z = 30.8, Y = 14.3,
-    RX = -104.2, RY = -15.7, RZ = 0;
+    RX = -104.2, RY = -40, RZ = 0;
 
 /* -----------------------------[ w.js 初始化 ]----------------------------------------- */
-c.width = window.innerWidth - 100
-c.height = window.innerHeight -100
+c.width = window.innerWidth - 100;
+c.height = window.innerHeight -100;
 W.reset(c);
 W.ambient(0.7);
 W.light({x:.5,y:-.3,z:-.5});
 W.clearColor("8Af");
 
 /* -----------------------------[ 绘制原点坐标轴 ]----------------------------------------- */
-W.cube({x:5,w:10,h:.5,d:.5,b:"f44"});    
-W.cube({y:5,h:10,w:.5,d:.5,b:"4f4"});
-W.cube({z:5,d:10,w:.5,h:.5,b:"44f"});
-W.pyramid({size:1,x:10,rz:-90,b:"f44"});
-W.pyramid({size:1,y:10,b:"4f4"});
-W.pyramid({size:1,z:10,rx:90,b:"44f"});
+W.group({n: 'posZero', x: 0, y: 1, z: 0});
+W.cube({g:'posZero', x:5,w:10,h:.5,d:.5,b:"f44"});
+W.cube({g:'posZero', y:5,h:10,w:.5,d:.5,b:"4f4"});
+W.cube({g:'posZero', z:5,d:10,w:.5,h:.5,b:"44f"});
+W.pyramid({g:'posZero', size:1,x:10,rz:-90,b:"f44"});
+W.pyramid({g:'posZero', size:1,y:10,b:"4f4"});
+W.pyramid({g:'posZero', size:1,z:10,rx:90,b:"44f"});
 
 /* -----------------------------[ 物理引擎初始化 ]----------------------------------------- */
 const world = new CANNON.World();
@@ -51,38 +53,30 @@ groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2); 
 world.addBody(groundBody);
 
 /* -----------------------------[ w.js 创建地面模型 ]----------------------------------------- */
-W.group({n: "ground", x: 0, y: 0.5, z: 0});
-W.plane({
-  g: "ground",
-  n: "ground_plane",
-  size: 20,
-  b: "#8bc34a",
-  s: 0.5,
-  rx: -90
-});
+W.cube({n:'ground' ,x: 0,y :0, z:0, w:100, d:100, h:1, b:'#aaa'});
 
-/* -----------------------------[ 创建球体物理体 ]----------------------------------------- */
+/* -----------------------------[ 创建主角物理体 ]----------------------------------------- */
 const sphereBody = new CANNON.Body({ 
                               mass: 5,
                               shape: new CANNON.Sphere(1),  // 半径为 1 的球体
-                              position: new CANNON.Vec3(0, 30, 0),  // 位置
+                              position: new CANNON.Vec3(10, 30, 10),  // 位置
                               material: cannonDefaultCantactMaterial,
                     });
 world.addBody(sphereBody);
 
-/* -----------------------------[ w.js 创建球体模型 ]----------------------------------------- */
-W.group({n: "ball", x: 0, y: 0, z: 0});
+/* -----------------------------[ w.js 创建主角球体模型 ]----------------------------------------- */
+W.group({n: "ball"});
 W.sphere({
   g: "ball",
   n: "ball_sphere",
   size: 1,
   b: "#2196f3",
-  s: 0.8
+  s: 0.8,
 });
 
 
 /* -----------------------------[ 绘制主角和摄像机 ]----------------------------------------- */
-W.sphere({n:"M",size:1, x:X, y:Y, z:Z, rx:RX, ry:RY, rz:RZ, b:"ccc",s:1});
+W.sphere({n:"M",size:1, x:X, y:Y, z:Z, rx:RX, ry:RY, rz:RZ, b:"ccc", s:1});
 W.sphere({g:"M", n:"head",size:0.6,y:0, z:0.6, rx:-90,ry:0, b:"ccc",s:1});   // 头绑定身体 M，注意，坐标以 M 为基准
 W.camera({g:"M",z:.5,y:-2.5,rx:90});  // 摄像机，此时它的 g 属性为主角 sphere 的 n 属性，摄像机与主角绑定
 
@@ -146,6 +140,21 @@ function viewChangeAction(){
                 ry: RY,
                 rz: RZ
             });
+    W.camera({
+    });
+}
+
+/* -----------------------------[ 小球移动变化 ]----------------------------------------- */
+function ballMoveAction(){
+    return
+    const { position, quaternion } = sphereBody;
+    const { x, y, z, rx, ry, rz } = calMovePara(
+        position.x, position.y, position.z,
+        quaternion.x, quaternion.y, quaternion.z
+    );
+    Object.assign(position, { x, y, z });
+    Object.assign(quaternion, { x: rx, y: ry, z: rz });
+    return { position, quaternion };
 }
 
 /* -----------------------------[ 函数，计算移动变化 ]----------------------------------------- */
@@ -222,6 +231,7 @@ function cannonAni(){
 function animate() {
   requestAnimationFrame(animate);
   viewChangeAction();  // 鼠标视角变化
+  ballMoveAction();  // 小球的移动变化
   cannonAni();  // 物理世界
 }
 animate();
