@@ -1,7 +1,7 @@
 <?php
 /*
-Plugin Name: 先压缩后上传图片工具 2.2
-Version: 2.2
+Plugin Name: 先压缩后上传图片工具 1.5
+Version: 1.5
 Description: 很实用的小工具，在文章编辑页上传图片时，先压缩图片后上传，节约服务器（或图床）空间。支持设置压缩参数，支持多图处理。
 Author: 串串狗xk
 Author URL: https://www.emlog.net/author/index/578
@@ -144,7 +144,7 @@ addAction('adm_footer', function(){  // js 脚本和模态框
     <script src="<?php echo BLOG_URL; ?>content/plugins/silmimg/js/pako.min.js"></script>
     <script src="<?php echo BLOG_URL; ?>content/plugins/silmimg/js/jszip.min.js"></script>
     <script src="<?php echo BLOG_URL; ?>content/plugins/silmimg/js/FileSaver.min.js"></script>
-    <script src="<?php echo BLOG_URL; ?>content/plugins/silmimg/js/main.js"></script>
+    <script src="<?php echo BLOG_URL; ?>content/plugins/silmimg/js/main.jsv=1.5"></script>
 <?php });
 
 

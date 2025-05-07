@@ -110,7 +110,9 @@
         silmImgTool.style.height = newImgEle.height + 'px';
         singleImgDisplay.onclick = function(){  // 单张图片时，在新窗口打开图片
           let imgTempBlob = new Blob(['<img style="max-width:100%" src="'+ out_base64[i] +'">'], {type: 'text/html'});
-          window.open(window.URL.createObjectURL(imgTempBlob), '_blank');
+          let imgTempUrl = window.URL.createObjectURL(imgTempBlob);
+          window.open(imgTempUrl, '_blank');
+          window.URL.revokeObjectURL(imgTempUrl);
         }
       }  // 在前端显示图片出来
     } else {
@@ -131,7 +133,9 @@
           `;
           document.getElementById('demoimgid' + displayBase64Id).onclick = function(e){  // 多张图片时，在新窗口打开图片
             let imgTempBlob = new Blob(['<img style="max-width:100%" src="'+ out_base64[displayBase64Id] +'">'], {type: 'text/html'});
-            window.open(window.URL.createObjectURL(imgTempBlob), '_blank');
+            let imgTempUrl = window.URL.createObjectURL(imgTempBlob);
+            window.open(imgTempUrl, '_blank');
+            window.URL.revokeObjectURL(imgTempUrl);
           }
         }
       });
@@ -326,10 +330,11 @@
           }
           $("#silmimgMsg").html('获取结果失败！');
         })
-      }, error: function (result) { alert('上传失败,原因未知'); $("#silmimgMsg").html('上传失败,原因未知'); }
+      }, error: function (result) { alert('上传失败,原因未知'); $("#silmimgMsg").html('上传失败,原因未知'); temp_out_base64 = [];}
     })
   }
 
+  
   // 悬浮按钮的点击和拖动事件
   silmIBtn.onmousedown = function(e){
     let x = e.clientX - silmIBtn.offsetLeft;
