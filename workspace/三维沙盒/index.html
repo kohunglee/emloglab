@@ -6,13 +6,7 @@
 <div id="testinfo"></div>
 <script>
 
-// 变量区
-var X = 7.2, Z = 30.8, Y = 14.3, RX = -104.2, RY = -15.7, RZ = 0;  // 这些是主角的初始位置
-
-// 小球的初始旋转
-var ballRX = 0;   var ballRY = 0;   var ballRZ = 0;
-
-// 函数区
+// 一些数学函数
 wMath = {
     quaternionToEuler: function(q){  // 四元数转化为欧拉数
         const { x, y,  z,  w } = q;
@@ -52,29 +46,25 @@ W.pyramid({g:'posZero',size:1,x:10,rz:-90,b:"f44"});
 W.pyramid({g:'posZero',size:1,y:10,b:"4f4"});
 W.pyramid({g:'posZero',size:1,z:10,rx:90,b:"44f"});
 
-// 物理引擎初始化
-const world = new CANNON.World();
-world.gravity.set(0, -9.82, 0); // 地球重力9.82m/s²
-world.broadphase = new CANNON.NaiveBroadphase(); // 碰撞检测
-world.solver.iterations = 10; // 物理迭代
-const cannonDefaultCantactMaterial = new CANNON.ContactMaterial( // 默认材质关联材质
-    new CANNON.Material(),
-    new CANNON.Material(), {
-        friction: 0.1, // 摩擦力
-        restitution: 0.1, // 弹性系数
-    }
-)
-world.addContactMaterial(cannonDefaultCantactMaterial);
-
 var ccgxk = {
-    ccgxkWorld : null,
+    // ccgxk 物理世界
+    world : null,
 
-    initCcgxkWorld : function(){
-        const ccgxkWorld = new CANNON.World();
-        ccgxkWorld.gravity.set(0, -9.82, 0); // 地球重力9.82m/s²
-        ccgxkWorld.broadphase = new CANNON.NaiveBroadphase(); // 碰撞检测
-        ccgxkWorld.solver.iterations = 10; // 物理迭代
-        ccgxkWorld.addContactMaterial(cannonDefaultCantactMaterial);
+    // 默认材质关联材质
+    cannonDefaultCantactMaterial : new CANNON.ContactMaterial( // 默认材质关联材质
+        new CANNON.Material(),
+        new CANNON.Material(), {
+            friction: 0.1, // 摩擦力
+            restitution: 0.1, // 弹性系数
+    }),
+
+    // 初始化物理世界
+    initWorld : function(){
+        this.world = new CANNON.World();
+        this.world.gravity.set(0, -9.82, 0); // 地球重力9.82m/s²
+        this.world.broadphase = new CANNON.NaiveBroadphase(); // 碰撞检测
+        this.world.solver.iterations = 10; // 物理迭代
+        this.world.addContactMaterial(this.cannonDefaultCantactMaterial);
     },
 
     // 物理体列表
@@ -91,9 +81,9 @@ var ccgxk = {
             mass,
             shape: new CANNON.Box(new CANNON.Vec3(width, height, depth)),
             position: new CANNON.Vec3(X, Y, Z),
-            material: cannonDefaultCantactMaterial,
+            material: ccgxk.cannonDefaultCantactMaterial,
         });
-        world.addBody(body);
+        this.world.addBody(body);
         W.cube({
             n: name,
             w: width * 2, d: depth * 2, h: height * 2,
@@ -115,60 +105,237 @@ var ccgxk = {
                 z: pos.z,
             });
         }
-    }
+    },
+
+    // 操作状态值
+    keys : {
+        viewForward: 0,
+        viewBackward: 0,
+        turnRight: 0,
+        turnLeft: 0,
+        turnUp: 0, // 视角向上转动
+        turnDown: 0,
+        viewUp: 0,
+        viewDown: 0,
+        viewLeft: 0,
+        viewRight: 0,
+        shiftKeyvalue: 0,
+        jumping: 0,
+    },
+
+    // 键盘按键与操作状态值的对应
+    keyMap : { // 键盘按键与操作值的对应关系
+        'w': 'viewForward',
+        's': 'viewBackward',
+        'a': 'viewLeft',
+        'd': 'viewRight',
+        'r': 'viewUp',
+        'v': 'viewDown',
+        'o': 'turnUp',
+        'p': 'turnDown',
+        'k': 'viewLeft',
+        'l': 'viewRight',
+        'arrowup': 'viewForward',
+        'arrowdown': 'viewBackward',
+        'arrowleft': 'turnLeft',
+        'arrowright': 'turnRight',
+    },
+
+    // 键盘事件监听
+    eventListener : function(){
+        var isMouseMove = false;
+        document.addEventListener('keydown', function(e) {  // 按下键盘
+            ccgxk._handleKey(e, 1);
+        });
+        document.addEventListener('keyup', function(e) {  // 松开键盘
+            ccgxk._handleKey(e, 0);
+        });
+        document.addEventListener('mousemove', function(e) {  // 鼠标移动
+            if (isMouseMove) {
+                keys.turnRight = e.movementX * 0.1;
+                keys.turnUp = e.movementY * 0.1;
+            }
+        });
+        document.addEventListener('click', () => {
+            document.requestPointerLock = document.requestPointerLock || document.mozRequestPointerLock || document.webkitRequestPointerLock;
+            document.requestPointerLock();
+            isMouseMove = true;
+        });
+        document.addEventListener('pointerlockchange', lockChangeAlert, false);
+        document.addEventListener('mozpointerlockchange', lockChangeAlert, false);
+        document.addEventListener('webkitpointerlockchange', lockChangeAlert, false);
+        function lockChangeAlert() {
+            if (document.pointerLockElement === document || document.mozPointerLockElement === document || document.webkitPointerLockElement === document) {
+                isMouseMove = true;
+            } else {
+                isMouseMove = false;
+            }
+        }
+
+    },
+
+    // 键盘事件处理逻辑
+    _handleKey : function(e, value) {
+        if (this.keyMap[e.key.toLowerCase()]) {
+            this.keys[this.keyMap[e.key.toLowerCase()]] = value;
+        }
+        if (e.keyCode === 32) {  // 空格键
+            if (this.keys.jumping === 0  && mainVPlayer.position.y <= 3) {
+                mainVPlayer.velocity.y = 5;
+            }
+            this.keys.jumping = value;
+        }
+    },
+
+    // 计算视角移动参数
+    calMovePara : function(X, Y, Z, RX, RY, RZ){
+        const keys = this.keys;
+        if (keys.viewForward || keys.viewBackward) { // 前后平移
+            Z += (-keys.viewForward + keys.viewBackward) * Math.cos(RY * Math.PI / 180) / 4;
+            X += (-keys.viewForward + keys.viewBackward) * Math.sin(RY * Math.PI / 180) / 4;
+        }
+        if (keys.viewLeft || keys.viewRight) { // 左右平移
+            Z += (-keys.viewLeft + keys.viewRight) * Math.cos((RY + 90) * Math.PI / 180) / 10;
+            X += (-keys.viewLeft + keys.viewRight) * Math.sin((RY + 90) * Math.PI / 180) / 10;
+        }
+        if (keys.viewUp || keys.viewDown) { // 上下平移
+            var offset = (keys.viewUp - keys.viewDown) / 7;
+            Y += offset;
+        }
+        if(keys.turnRight || keys.turnLeft) {  // 左右扭动
+            var offset = (-keys.turnRight + keys.turnLeft);
+            if(Math.abs(offset) > 0.1){
+                RY += offset;
+            }
+        }
+        if(keys.turnUp || keys.turnDown) {  // 上下扭动
+            var offset = (-keys.turnUp + keys.turnDown);
+            if(Math.abs(offset) > 0.5){
+                // if ((offset > 0 && RX < 0) || (offset < 0 && RX > -180)) {  // 限制
+                RX += offset;
+                // }
+            }
+        }
+        return {  x: X,  y: Y,  z: Z,  rx: RX,  ry: RY,  rz: RZ  }
+    },
+
+    objMoveAction : function(cannonObj){
+        const { position, quaternion } = cannonObj;
+        const { x, y, z, rx, ry, rz } = this.calMovePara(
+            position.x, position.y, position.z,
+            ballRX, ballRY, ballRZ
+        );
+        Object.assign(position, {  x,  y,  z  });
+
+        // ballRX = rx; ballRY = ry; ballRZ = rz;
+
+        return 0;
+    },
+
+    cannonAni : function(){
+        const timeStep = 1 / 60; // 时间步长
+        this.world.step(timeStep); // 更新物理世界
+        W.move({ // 更新球体位置和旋转
+            n: "ball",
+            x: mainVPlayer.position.x,
+            y: mainVPlayer.position.y,
+            z: mainVPlayer.position.z,
+            rx: ballRX,
+            ry: ballRY,
+            rz: ballRZ
+        });
+        W.move({n:"ball_sphere", g: null,
+            x: mainVPlayer.position.x,
+            y: mainVPlayer.position.y,
+            z: mainVPlayer.position.z,
+            rx:0,ry:ballRY,rz:0
+        });
+    },
+
+    animate : function(){
+        const viewAnimate = function() {
+            requestAnimationFrame(animate);
+            ballMoveAction(); // 小球的移动变化
+            cannonAni(); // 物理世界
+            ccgxk.updataBodylist(); // 更新物体列表
+        }
+        viewAnimate();
+    },
+
+
+
+
 }
-ccgxk.addPhysicalBox({name: 'test', X: -30, Y: 1, Z: -30, mass: 0, width: 10, depth: 15, height: 1, texture: marble}); 
+ccgxk.initWorld();
 
-// 创建地面物理体
-const groundBody = new CANNON.Body({ // 添加地面
-    mass: 0, // 质量为 0
-    position: new CANNON.Vec3(0, 0, 0), // 坐标原点
-    shape: new CANNON.Plane(), // 一个无限延伸的平面
-    material: cannonDefaultCantactMaterial,
+ccgxk.addPhysicalBox({  // 创建一个 测试 物理体
+    name: 'test', X: -30, Y: 1, Z: -30,
+    mass: 0, width: 10, depth: 15, height: 1, texture: marble
 });
-groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2); // 旋转平面90度
-world.addBody(groundBody);
 
-// w.js 创建地面模型
-W.cube({n:'ground',x:0,y:0,z:0,w:100*100,d:100*100,h:0.01,t:marble,b:'#FFF',mix:0.71});
+ccgxk.addPhysicalBox({  // 创建地面
+    name: 'groundPlane', X: 0, Y: 0, Z: 0,
+    mass: 0, width: 100, depth: 100, height: 0.01,
+    texture: marble, background: '#FFF', mixValue: 0.71, rX: 0
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// 小球的初始旋转
+var ballRX = 0;   var ballRY = 0;   var ballRZ = 0;
 
 // 创建主角物理体
-const sphereBody = new CANNON.Body({
-    mass: 500,
+const mainVPlayer = new CANNON.Body({
+    mass: 5,
     shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)), // 立方体，边长为 1
     position: new CANNON.Vec3(30, 30, 30), // 位置
-    material: cannonDefaultCantactMaterial,
+    material: ccgxk.cannonDefaultCantactMaterial,
 });
-world.addBody(sphereBody);
+ccgxk.world.addBody(mainVPlayer);
 
 // w.js 创建主角球体模型
 W.group({ n: "ball", x:30, y:30, z:30,rx:ballRX,ry:ballRY,rz:ballRZ});
 W.cube({g:"ball",n:"ball_sphere",size:2, t:marble,s:0.8,rx:0,ry:0,rz:0});
 
-/* -----------------------------------[ 实验区 ]------------------------------------------ */
-// function addPhysicalBox({ name = 'k'+(Math.random()*10**9|0), x = 5, y = 5, z = 5, mass = 5, width = 1, depth = 1, height = 1 } = {}) {
-//     const body = new CANNON.Body({
-//         mass,
-//         shape: new CANNON.Box(new CANNON.Vec3(width, height, depth)),
-//         position: new CANNON.Vec3(x, y, z),
-//         material: cannonDefaultCantactMaterial,
-//     });
-//     world.addBody(body);
-//     W.cube({ n: name, w: width * 2, d: depth * 2, h: height * 2, x, y, z, t: marble, s: 0.8, rx: 0, ry: 0, rz: 0 });
-//     bodylist.push({ name, body });
-//     return body;
-// }
-// function updataBodylist(){
-//     for (let i = 0; i < bodylist.length; i++) {
-//         let pos = bodylist[i].body.position;
-//         W.move({
-//             n: bodylist[i].name,
-//             x: pos.x,
-//             y: pos.y,
-//             z: pos.z,
-//         });
-//     }
-// }
+
+
+
+
+
+
+ccgxk.addPhysicalBox({
+    name: 'mainPlayer', X: 15, Y: 10, Z: 30,
+    rX: ballRX, rY: ballRY, rZ: ballRZ,
+    mass: 5, texture: marble
+})
 
 
 
@@ -176,8 +343,6 @@ W.cube({g:"ball",n:"ball_sphere",size:2, t:marble,s:0.8,rx:0,ry:0,rz:0});
 
 
 
-
-/* ----------------------------------------------------------------------------- ****************************************************/
 
 W.camera({g: "ball", z: 15, y: 5, rx: 0}); // 摄像机，此时它的 g 属性为主角 sphere 的 n 属性，摄像机与主角绑定
 
@@ -212,14 +377,15 @@ const keyMap = { // 键盘按键与操作值的对应关系
     'arrowleft': 'turnLeft',
     'arrowright': 'turnRight',
 };
+
 const handleKey = (e, value) => {
     if (keyMap[e.key.toLowerCase()]) {
         keys[keyMap[e.key.toLowerCase()]] = value;
     }
     if (e.keyCode === 32) {
         // 空格键
-        if (keys.jumping === 0  && sphereBody.position.y <= 3) {
-            sphereBody.velocity.y = 10; // 跳跃
+        if (keys.jumping === 0  && mainVPlayer.position.y <= 3) {
+            mainVPlayer.velocity.y = 10; // 跳跃
         }
         keys.jumping = value;
     }
@@ -232,7 +398,7 @@ function ballMoveAction() {
     const {
         position,
         quaternion
-    } = sphereBody;
+    } = mainVPlayer;
     const { x, y, z, rx, ry, rz } = calMovePara(
         position.x, position.y, position.z,
         ballRX, ballRY, ballRZ
@@ -302,20 +468,20 @@ function lockChangeAlert() {
 // 物理动作
 function cannonAni() {
     const timeStep = 1 / 60; // 时间步长
-    world.step(timeStep); // 更新物理世界
+    ccgxk.world.step(timeStep); // 更新物理世界
     W.move({ // 更新球体位置和旋转
         n: "ball",
-        x: sphereBody.position.x,
-        y: sphereBody.position.y,
-        z: sphereBody.position.z,
+        x: mainVPlayer.position.x,
+        y: mainVPlayer.position.y,
+        z: mainVPlayer.position.z,
         rx: ballRX,
         ry: ballRY,
         rz: ballRZ
     });
     W.move({n:"ball_sphere", g: null,
-        x: sphereBody.position.x,
-        y: sphereBody.position.y,
-        z: sphereBody.position.z,
+        x: mainVPlayer.position.x,
+        y: mainVPlayer.position.y,
+        z: mainVPlayer.position.z,
         rx:0,ry:ballRY,rz:0
     });
 }
