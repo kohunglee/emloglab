@@ -3,6 +3,7 @@
 <script src="https://img1.ccgxk.com/jscdn/cannon.min.js"></script>
 <img src='./img/texture.jpeg' id=marble hidden>
 <canvas id=c width=320 height=300></canvas>
+<div id="testinfo"></div>
 <script>
 
 // 变量区
@@ -123,7 +124,10 @@ function updataBodylist(){
             y: pos.y,
             z: pos.z,
         });
+        //testinfo.innerHTML = sphereBody.velocity.y;
     }
+    // sphereBody.force.set(0, 0, 0);
+    // sphereBody.applyForce(new CANNON.Vec3(0, 0, 10000), sphereBody.position);
     // if(isSet0V){
     //     sphereBody.velocity.set(0,0,0);
     // }
@@ -149,6 +153,7 @@ keys = { // 操作值
     viewLeft: 0,
     viewRight: 0,
     shiftKeyvalue: 0,
+    jumping: 0,
 };
 const keyMap = { // 键盘按键与操作值的对应关系
     'w': 'viewForward',
@@ -171,7 +176,11 @@ const handleKey = (e, value) => {
         keys[keyMap[e.key.toLowerCase()]] = value;
     }
     if (e.keyCode === 32) {
-        keys['viewUp'] = value;
+        // 空格键
+        if (keys.jumping === 0  && sphereBody.position.y <= 3) {
+            sphereBody.velocity.y = 10; // 跳跃
+        }
+        keys.jumping = value;
     }
 };
 onkeydown = e => handleKey(e, 1);
@@ -210,7 +219,6 @@ function ballMoveAction() {
 
 // 函数，计算移动变化
 function calMovePara(X, Y, Z, RX, RY, RZ) {
-    console.log(keys.shiftKeyvalue);
     if (keys.viewForward || keys.viewBackward) { // 前后平移
         Z += (-keys.viewForward + keys.viewBackward) * Math.cos(RY * Math.PI / 180) / 4;
         X += (-keys.viewForward + keys.viewBackward) * Math.sin(RY * Math.PI / 180) / 4;
