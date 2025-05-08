@@ -83,12 +83,12 @@ groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2); 
 world.addBody(groundBody);
 
 // w.js 创建地面模型
-W.cube({n:'ground',x:0,y:0,z:0,w:100,d:100,h:1,t:marble,b:'#FFF',mix:0.71});
+W.cube({n:'ground',x:0,y:0,z:0,w:100*100,d:100*100,h:0.01,t:marble,b:'#FFF',mix:0.71});
 
 // 创建主角物理体
 const sphereBody = new CANNON.Body({
-    mass: 5,
-    shape: new CANNON.Sphere(1), // 半径为 1 的球体
+    mass: 500,
+    shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)), // 立方体，边长为 1
     position: new CANNON.Vec3(30, 30, 30), // 位置
     material: cannonDefaultCantactMaterial,
 });
@@ -96,8 +96,39 @@ world.addBody(sphereBody);
 
 // w.js 创建主角球体模型
 W.group({ n: "ball", x:30, y:30, z:30,rx:ballRX,ry:ballRY,rz:ballRZ});
-W.cube({g:"ball",n:"ball_sphere",size:1, t:marble,s:0.8,rx:0,ry:0,rz:0});
+W.cube({g:"ball",n:"ball_sphere",size:2, t:marble,s:0.8,rx:0,ry:0,rz:0});
 
+/* -----------------------------------[ 实验区 ]------------------------------------------ */
+var bodylist = new Array();
+function addPhysicalBox(name, x = 5, y = 5, z = 5, mass = 5, width = 1, dep = 1, height = 1) {
+    const body = new CANNON.Body({
+        mass: mass,
+        shape: new CANNON.Box(new CANNON.Vec3(width, height, dep)), // 立方体，边长为 1
+        position: new CANNON.Vec3(x, y, z),
+        material: cannonDefaultCantactMaterial,
+    });
+    world.addBody(body);
+    W.cube({n:name, w: width * 2, d: dep * 2, h: height * 2, x: x, y: y, z: z, t:marble, s:0.8, rx:0,ry:0,rz:0});
+    bodylist.push({name, body});
+    return body;
+}
+addPhysicalBox('test', -30, 1, -30,    mass = 0,   10, 15, 1);
+// isSet0V = false;
+function updataBodylist(){
+    for (let i = 0; i < bodylist.length; i++) {
+        let pos = bodylist[i].body.position;
+        W.move({
+            n: bodylist[i].name,
+            x: pos.x,
+            y: pos.y,
+            z: pos.z,
+        });
+    }
+    // if(isSet0V){
+    //     sphereBody.velocity.set(0,0,0);
+    // }
+}
+/* ----------------------------------------------------------------------------- ****************************************************/
 
 // 绘制主角和摄像机
 // W.sphere({n: "M", size: 1, x: X, y: Y, z: Z, rx: RX, ry: RY, rz: RZ, b: "ccc", s: 1});
@@ -117,9 +148,8 @@ keys = { // 操作值
     viewDown: 0,
     viewLeft: 0,
     viewRight: 0,
+    shiftKeyvalue: 0,
 };
-
-
 const keyMap = { // 键盘按键与操作值的对应关系
     'w': 'viewForward',
     's': 'viewBackward',
@@ -178,12 +208,12 @@ function ballMoveAction() {
     return 0;
 }
 
-
 // 函数，计算移动变化
 function calMovePara(X, Y, Z, RX, RY, RZ) {
+    console.log(keys.shiftKeyvalue);
     if (keys.viewForward || keys.viewBackward) { // 前后平移
-        Z += (-keys.viewForward + keys.viewBackward) * Math.cos(RY * Math.PI / 180) / 10;
-        X += (-keys.viewForward + keys.viewBackward) * Math.sin(RY * Math.PI / 180) / 10;
+        Z += (-keys.viewForward + keys.viewBackward) * Math.cos(RY * Math.PI / 180) / 4;
+        X += (-keys.viewForward + keys.viewBackward) * Math.sin(RY * Math.PI / 180) / 4;
     }
     if (keys.viewLeft || keys.viewRight) { // 左右平移
         Z += (-keys.viewLeft + keys.viewRight) * Math.cos((RY + 90) * Math.PI / 180) / 10;
@@ -265,6 +295,7 @@ function animate() {
     //viewChangeAction();  // 鼠标视角变化
     ballMoveAction(); // 小球的移动变化
     cannonAni(); // 物理世界
+    updataBodylist(); // 更新物体列表
 }
 animate();
 
