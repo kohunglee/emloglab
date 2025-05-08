@@ -67,9 +67,13 @@
         </style>
     </head>
     <body>
+        <!-- 这俩库不用管 -->
         <script src="js/cannon.js"></script>
         <script src="js/Three.js"></script>
+
+        <!-- 鼠标锁定后？好像是第一人称的控制库。 -->
         <script src="js/PointerLockControls.js"></script>
+        <!-- 旋转？ -->
         <script src="js/VoxelLandscape.js"></script>
 
         <div id="info">
@@ -187,6 +191,9 @@
             animate();
 
             // 初始化卡农
+            /*
+                是物理引擎的初始化，
+            */
             function initCannon(){
                 // Setup our world
                 world = new CANNON.World();
@@ -265,6 +272,7 @@
                 console.log(voxels.boxes.length+" voxel physics bodies");
             }
 
+            /* 初始化 THREEJS，注意 camera */
             function init() {
 
                 camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -294,7 +302,7 @@
                 }
                 scene.add( light );
 
-                controls = new PointerLockControls( camera , sphereBody );
+                controls = new PointerLockControls( camera , sphereBody );  
                 scene.add( controls.getObject() );
 
                 // floor
@@ -333,12 +341,14 @@
                 window.addEventListener( 'resize', onWindowResize, false );
             }
 
+            // 窗口大小变化后的动作
             function onWindowResize() {
                 camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
                 renderer.setSize( window.innerWidth, window.innerHeight );
             }
 
+            // 动画
             var dt = 1/60;
             function animate() {
                 requestAnimationFrame( animate );
@@ -348,7 +358,7 @@
                     // Update ball positions
                     for(var i=0; i<balls.length; i++){
                         ballMeshes[i].position.copy(balls[i].position);
-                        ballMeshes[i].quaternion.copy(balls[i].quaternion);
+                        ballMeshes[i].quaternion.copy(balls[i].quaternion);  // copy 是做什么用的
                     }
 
                     // Update box positions
@@ -364,6 +374,7 @@
 
             }
 
+            // 用于射击的小球
             var ballShape = new CANNON.Sphere(0.2);
             var ballGeometry = new THREE.SphereGeometry(ballShape.radius);
             var shootDirection = new THREE.Vector3();
@@ -379,6 +390,8 @@
                 targetVec.z = ray.direction.z;
             }
 
+
+            // 单击事件后，射击小球
             window.addEventListener("click",function(e){
                 if(controls.enabled==true){
                     var x = sphereBody.position.x;
