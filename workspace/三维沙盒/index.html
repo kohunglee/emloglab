@@ -1,24 +1,53 @@
 <style>body{margin: 0;}</style>
 <script src="https://img1.ccgxk.com/wjs/w.js"></script>
 <script src="https://img1.ccgxk.com/jscdn/cannon.min.js"></script>
-<script src="https://xem.github.io/W/demos/mariotexture.js"></script>
+<img src='./img/texture.jpeg' id=marble hidden>
 <canvas id=c width=320 height=300></canvas>
 <script>
 
-/* -----------------------------[ 变量区 ]----------------------------------------- */
+// 变量区
 // 这些是主角的初始位置
 var X = 7.2, Z = 30.8, Y = 14.3,
-    RX = -104.2, RY = -40, RZ = 0;
+    RX = -104.2, RY = -15.7, RZ = 0;
 
-/* -----------------------------[ w.js 初始化 ]----------------------------------------- */
-c.width = window.innerWidth - 100;
-c.height = window.innerHeight -100;
+// 函数区
+// 四元数转化为欧拉数
+function quaternionToEuler(q) {
+    const { x, y, z, w } = q;
+    const roll = Math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y));  // Roll (X轴)
+    const sinPitch = 2*(w*y - z*x);
+    const pitch = Math.asin(Math.max(-1, Math.min(1, sinPitch)));  // Pitch (Y轴)
+    const yaw = Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z));  // Yaw (Z轴)
+    const toDeg = angle => angle * (180 / Math.PI);  // 转为度数
+    return { x: toDeg(roll), y: toDeg(pitch), z: toDeg(yaw) };
+}
+// 欧拉数转化为四元数
+function eulerToQuaternion(roll, pitch, yaw) {
+    const rollRad = roll * (Math.PI / 180);
+    const pitchRad = pitch * (Math.PI / 180);
+    const yawRad = yaw * (Math.PI / 180);
+    const cr = Math.cos(rollRad * 0.5);
+    const sr = Math.sin(rollRad * 0.5);
+    const cp = Math.cos(pitchRad * 0.5);
+    const sp = Math.sin(pitchRad * 0.5);
+    const cy = Math.cos(yawRad * 0.5);
+    const sy = Math.sin(yawRad * 0.5);
+    const w = cr * cp * cy + sr * sp * sy;
+    const x = sr * cp * cy - cr * sp * sy;
+    const y = cr * sp * cy + sr * cp * sy;
+    const z = cr * cp * sy - sr * sp * cy;
+    return { x, y, z, w };
+}
+
+// w.js 初始化
+c.width = window.innerWidth - 100
+c.height = window.innerHeight -100
 W.reset(c);
 W.ambient(0.7);
 W.light({x:.5,y:-.3,z:-.5});
 W.clearColor("8Af");
 
-/* -----------------------------[ 绘制原点坐标轴 ]----------------------------------------- */
+// 绘制原点坐标轴
 W.group({n: 'posZero', x: 0, y: 1, z: 0});
 W.cube({g:'posZero', x:5,w:10,h:.5,d:.5,b:"f44"});
 W.cube({g:'posZero', y:5,h:10,w:.5,d:.5,b:"4f4"});
@@ -27,7 +56,7 @@ W.pyramid({g:'posZero', size:1,x:10,rz:-90,b:"f44"});
 W.pyramid({g:'posZero', size:1,y:10,b:"4f4"});
 W.pyramid({g:'posZero', size:1,z:10,rx:90,b:"44f"});
 
-/* -----------------------------[ 物理引擎初始化 ]----------------------------------------- */
+// 物理引擎初始化
 const world = new CANNON.World();
 world.gravity.set(0, -9.82, 0);  // 重力加速度，模拟地球重力9.82m/s²
 world.broadphase = new CANNON.NaiveBroadphase();  // 基础碰撞检测算法
@@ -42,7 +71,7 @@ const cannonDefaultCantactMaterial = new CANNON.ContactMaterial(  // 创建两�
 )
 world.addContactMaterial(cannonDefaultCantactMaterial)
 
-/* -----------------------------[ 创建地面物理体 ]----------------------------------------- */
+// 创建地面物理体
 const groundBody = new CANNON.Body({ // 添加地面
                             mass: 0, // 质量为0
                             position: new CANNON.Vec3(0, 0, 0),  // 坐标原点
@@ -52,35 +81,35 @@ const groundBody = new CANNON.Body({ // 添加地面
 groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);  // 旋转平面90度
 world.addBody(groundBody);
 
-/* -----------------------------[ w.js 创建地面模型 ]----------------------------------------- */
-W.cube({n:'ground' ,x: 0,y :0, z:0, w:100, d:100, h:1, b:'#aaa'});
+// w.js 创建地面模型
+W.cube({n:'ground' ,x: 0,y :0, z:0, w:100, d:100, h:1, t:marble, b:'#FFF', mix:0.71});
 
-/* -----------------------------[ 创建主角物理体 ]----------------------------------------- */
+// 创建主角物理体
 const sphereBody = new CANNON.Body({ 
                               mass: 5,
                               shape: new CANNON.Sphere(1),  // 半径为 1 的球体
-                              position: new CANNON.Vec3(10, 30, 10),  // 位置
+                              position: new CANNON.Vec3(0, 30, 0),  // 位置
                               material: cannonDefaultCantactMaterial,
                     });
 world.addBody(sphereBody);
 
-/* -----------------------------[ w.js 创建主角球体模型 ]----------------------------------------- */
+// w.js 创建主角球体模型
 W.group({n: "ball"});
-W.sphere({
+W.cube({
   g: "ball",
   n: "ball_sphere",
   size: 1,
   b: "#2196f3",
-  s: 0.8,
+  s: 0.8
 });
 
 
-/* -----------------------------[ 绘制主角和摄像机 ]----------------------------------------- */
-W.sphere({n:"M",size:1, x:X, y:Y, z:Z, rx:RX, ry:RY, rz:RZ, b:"ccc", s:1});
+// 绘制主角和摄像机
+W.sphere({n:"M",size:1, x:X, y:Y, z:Z, rx:RX, ry:RY, rz:RZ, b:"ccc",s:1});
 W.sphere({g:"M", n:"head",size:0.6,y:0, z:0.6, rx:-90,ry:0, b:"ccc",s:1});   // 头绑定身体 M，注意，坐标以 M 为基准
 W.camera({g:"M",z:.5,y:-2.5,rx:90});  // 摄像机，此时它的 g 属性为主角 sphere 的 n 属性，摄像机与主角绑定
 
-/* -----------------------------[ 按键事件 ]----------------------------------------- */
+// 按键事件
 keys = {  // 操作值
   viewForward:0,
   viewBackward:0,
@@ -123,7 +152,7 @@ onkeydown = e => handleKey(e, 1);
 onkeyup = e => handleKey(e, 0); 
 // onkeydown = e => {console.log(e.key)};  // 调试使用
 
-/* -----------------------------[ 视角变化 ]----------------------------------------- */
+// 视角变化
 function viewChangeAction(){
     var calMMove = calMovePara(X, Y, Z, RX, RY, RZ);
     Y = calMMove.y;
@@ -144,20 +173,26 @@ function viewChangeAction(){
     });
 }
 
-/* -----------------------------[ 小球移动变化 ]----------------------------------------- */
+// 小球移动变化
 function ballMoveAction(){
-    return
     const { position, quaternion } = sphereBody;
+    console.log('下');
+    console.log(quaternion);
+    var eulerR = quaternionToEuler(quaternion);
+    console.log('eulerR' + eulerR.y);
     const { x, y, z, rx, ry, rz } = calMovePara(
         position.x, position.y, position.z,
-        quaternion.x, quaternion.y, quaternion.z
+        eulerR.x , eulerR.y, eulerR.z
     );
     Object.assign(position, { x, y, z });
-    Object.assign(quaternion, { x: rx, y: ry, z: rz });
+    console.log(rx, ry, rz);
+    var quaternObj = eulerToQuaternion(rx, ry, rz);
+    console.log(quaternObj);
+    Object.assign(quaternion, quaternObj);
     return { position, quaternion };
 }
 
-/* -----------------------------[ 函数，计算移动变化 ]----------------------------------------- */
+// 函数，计算移动变化
 function calMovePara(X, Y, Z, RX, RY, RZ){
   if(keys.viewForward || keys.viewBackward) {  // 前后平移
     Z += (-keys.viewForward + keys.viewBackward) * Math.cos(RY*Math.PI/180) / 10;
@@ -173,14 +208,18 @@ function calMovePara(X, Y, Z, RX, RY, RZ){
   }
   if(keys.turnRight || keys.turnLeft) {  // 左右扭动
     var offset = (-keys.turnRight + keys.turnLeft);
+    console.log(offset);
+    console.log(RY);
     if(Math.abs(offset) > 0.1){
         RY += offset;
     }
+    console.log(RY);
   }
   if(keys.turnUp || keys.turnDown) {  // 上下扭动
     var offset = (-keys.turnUp + keys.turnDown);
     if(Math.abs(offset) > 0.5){
       if ((offset > 0 && RX < 0) || (offset < 0 && RX > -180)) {
+        
         RX += offset;
       }
     }
@@ -188,7 +227,7 @@ function calMovePara(X, Y, Z, RX, RY, RZ){
   return {x: X, y: Y, z: Z, rx: RX, ry: RY, rz:RZ}
 }
 
-/* -----------------------------[ Pointer Lock 和鼠标移动事件 ]----------------------------------------- */
+// Pointer Lock 和鼠标移动事件
 let isMouseMove = false;
 c.addEventListener('mousemove', (e) => {
   if(isMouseMove){
@@ -212,26 +251,27 @@ function lockChangeAlert() {
   }
 }
 
-/* -----------------------------[ 物理动作 ]----------------------------------------- */
+// 物理动作
 function cannonAni(){
   const timeStep = 1/60;  // 时间步长
   world.step(timeStep);  // 更新物理世界
+  var eulerR = quaternionToEuler(sphereBody.quaternion);
   W.move({  // 更新球体位置和旋转
     n: "ball",
     x: sphereBody.position.x,
     y: sphereBody.position.y,
     z: sphereBody.position.z,
-    rx: sphereBody.quaternion.x,
-    ry: sphereBody.quaternion.y,
-    rz: sphereBody.quaternion.z
+    rx: eulerR.x,
+    ry: eulerR.y,
+    rz: eulerR.z
   });
 }
 
-/* -----------------------------[ 帧运行 ]----------------------------------------- */
+// 帧运行
 function animate() {
   requestAnimationFrame(animate);
-  viewChangeAction();  // 鼠标视角变化
-  ballMoveAction();  // 小球的移动变化
+  //viewChangeAction();  // 鼠标视角变化
+  //ballMoveAction();  // 小球的移动变化
   cannonAni();  // 物理世界
 }
 animate();
