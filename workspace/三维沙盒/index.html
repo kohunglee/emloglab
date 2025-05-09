@@ -5,9 +5,10 @@
 <canvas id=c width=320 height=300></canvas>
 <div id="testinfo"></div>
 <script>
+// import * as CANNON from './js/cannon-es.js';
 
 // 一些数学函数
-wMath = {
+var wMath = {
     quaternionToEuler: function(q){  // 四元数转化为欧拉数
         const { x, y,  z,  w } = q;
         const roll = Math.atan2(2 * (w * x + y * z), 1 - 2 * (x * x + y * y)); // Roll (X轴)
@@ -34,7 +35,7 @@ c.width = window.innerWidth - 100
 c.height = window.innerHeight - 100
 W.reset(c);
 W.ambient(0.7);
-W.light({ x: 0.5, y: -.3, z: -.5});
+// W.light({ x: 0.5, y: -0.3, z: -0.5});
 W.clearColor("8Af");
 
 // 绘制原点坐标轴
@@ -48,6 +49,8 @@ W.pyramid({g:'posZero',size:1,z:10,rx:90,b:"44f"});
 
 // 项目对象
 var ccgxk = {
+    test: true,
+    
     // 初始化物理世界
     initWorld : function(){
         W.camera({n:'camera'});  // 初始化相机
@@ -55,8 +58,9 @@ var ccgxk = {
         this.world.gravity.set(0, -9.82, 0); // 地球重力9.82m/s²
         // this.world.broadphase = new CANNON.NaiveBroadphase(); // 碰撞检测（所有刚体件都进行碰撞）
         this.world.broadphase = new CANNON.SAPBroadphase(this.world) // SAP 分割
-        
-        this.world.solver.iterations = 1; // 物理迭代
+        // this.world.broadphase = new CANNON.GridBroadphase() // 网格分割
+        // this.world.allowSleep = true; // 允许睡眠
+        this.world.solver.iterations = 20; // 物理迭代
         this.world.addContactMaterial(this.cannonDefaultCantactMaterial);  // 默认材质关联
         this.eventListener();  // 事件监听
         this.animate(); // 动画
@@ -82,21 +86,28 @@ var ccgxk = {
                 X = 5, Y = 5, Z = 5,
                 mass = 5, width = 1, depth = 1, height = 1,
                 texture = null, smooth = 0.8, background = '#888', mixValue = 0.71, rX = 0, rY = 0, rZ = 0 } = {}){
-        const body = new CANNON.Body({
-            mass,
-            shape: new CANNON.Box(new CANNON.Vec3(width, height, depth)),
-            position: new CANNON.Vec3(X, Y, Z),
-            material: ccgxk.cannonDefaultCantactMaterial,
-        });
-        this.world.addBody(body);
+        
+            const body = new CANNON.Body({
+                mass,
+                shape: new CANNON.Box(new CANNON.Vec3(width, height, depth)),
+                position: new CANNON.Vec3(X, Y, Z),
+                material: ccgxk.cannonDefaultCantactMaterial,
+            });
+            this.world.addBody(body);
+        
+        
         W.cube({
             n: name,
             w: width * 2, d: depth * 2, h: height * 2,
             x: X, y:Y, z:Z, t: texture, s: smooth,
             rx: rX, ry: rY, rz: rZ, b: background, mix: mixValue
         });
-        var result = { name, body, rX, rY, rZ };
-        this.bodylist.push(result);
+        
+        if(this.test){
+            var result = { name, body, rX, rY, rZ };
+            this.bodylist.push(result);
+        }
+        
         return result;
     },
 
@@ -281,9 +292,9 @@ var ccgxk = {
 
     // 动画循环
     animate : function(){
-        _this = this;
-        lastTime = performance.now();
-        frameCount = 0; // FPS 计数器
+        var _this = this;
+        var lastTime = performance.now();
+        var frameCount = 0; // FPS 计数器
         const viewAnimate = function() {
 
             var currentTime = performance.now();
@@ -406,6 +417,8 @@ ccgxk.bodylist[1].body.updateMassProperties()  // 还要修改惯性张量
 所以和 MASS 有关...
 
 但也可能是 W.js 的原因
+
+破案了，是 WJS 的原因
 
 */
 </script>
