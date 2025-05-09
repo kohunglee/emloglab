@@ -2,8 +2,12 @@
 <script src="./js/w.js"></script>
 <script src="./js/cannon.js"></script>
 <img src='./img/texture.jpeg' id=marble hidden>
+<script src="https://xem.github.io/W/demos/mario.js"></script>
+<script src="https://xem.github.io/W/demos/mariotexture.js"></script>
 <canvas id=c width=320 height=300></canvas>
-<div id="testinfo"></div>
+<div id="fpsInfo"></div>
+<div id="shiftInfo"></div>
+<div id="posInfo"></div>
 <script>
 // import * as CANNON from './js/cannon-es.js';
 
@@ -35,7 +39,7 @@ c.width = window.innerWidth - 100
 c.height = window.innerHeight - 100
 W.reset(c);
 W.ambient(0.7);
-// W.light({ x: 0.5, y: -0.3, z: -0.5});
+W.light({ x: 0.5, y: -0.3, z: -0.5});
 W.clearColor("8Af");
 
 // 绘制原点坐标轴
@@ -45,12 +49,12 @@ W.cube({g:'posZero',y:5,h:10,w:.5,d:.5,b:"4f4"});
 W.cube({g:'posZero',z:5,d:10,w:.5,h:.5,b:"44f"});
 W.pyramid({g:'posZero',size:1,x:10,rz:-90,b:"f44"});
 W.pyramid({g:'posZero',size:1,y:10,b:"4f4"});
-W.pyramid({g:'posZero',size:1,z:10,rx:90,b:"44f"});
+W.pyramid({g:'posZero', n:'test0001' ,size:1,z:10,rx:90,b:"44f"});
+
+
 
 // 项目对象
 var ccgxk = {
-    test: true,
-    
     // 初始化物理世界
     initWorld : function(){
         W.camera({n:'camera'});  // 初始化相机
@@ -84,30 +88,24 @@ var ccgxk = {
     addPhysicalBox : function({ 
                 name = 'k'+(Math.random()*10**9|0),  // 如果没指认，则使用随机数生成 ID
                 X = 5, Y = 5, Z = 5,
-                mass = 5, width = 1, depth = 1, height = 1,
+                mass = 0, width = 1, depth = 1, height = 1,
                 texture = null, smooth = 0.8, background = '#888', mixValue = 0.71, rX = 0, rY = 0, rZ = 0 } = {}){
         
-            const body = new CANNON.Body({
-                mass,
-                shape: new CANNON.Box(new CANNON.Vec3(width, height, depth)),
-                position: new CANNON.Vec3(X, Y, Z),
-                material: ccgxk.cannonDefaultCantactMaterial,
-            });
-            this.world.addBody(body);
-        
-        
+        const body = new CANNON.Body({
+            mass : mass,
+            shape: new CANNON.Box(new CANNON.Vec3(width, height, depth)),
+            position: new CANNON.Vec3(X, Y, Z),
+            material: ccgxk.cannonDefaultCantactMaterial,
+        });
+        this.world.addBody(body);
         W.cube({
             n: name,
             w: width * 2, d: depth * 2, h: height * 2,
             x: X, y:Y, z:Z, t: texture, s: smooth,
             rx: rX, ry: rY, rz: rZ, b: background, mix: mixValue
         });
-        
-        if(this.test){
-            var result = { name, body, rX, rY, rZ };
-            this.bodylist.push(result);
-        }
-        
+        var result = { name, body, rX, rY, rZ };
+        this.bodylist.push(result);
         return result;
     },
 
@@ -169,6 +167,8 @@ var ccgxk = {
         'arrowright': 'turnRight',
     },
 
+    isShiftPress : 0,
+
     // 事件监听
     eventListener : function(){
         var _this = this;
@@ -214,14 +214,31 @@ var ccgxk = {
             }
             this.keys.jumping = value;
         }
+        if (e.keyCode === 16) {  // shift键
+            this.isShiftPress = value;
+        }
     },
+
+    // 主角移动和旋转
+    mainVPlayerMove : function(mainVPlayerObj){
+        if(mainVPlayerObj === null){return};
+        var cam = this.mainCamera;
+        cam.groupName = mainVPlayerObj.name;
+    },
+
+    forwardAcc : 0,
+
+
 
     // 计算物体的移动参数
     calMovePara : function(X, Y, Z, RX, RY, RZ){
         const keys = this.keys;
         if (keys.viewForward || keys.viewBackward) { // 前后平移
-            Z += (-keys.viewForward + keys.viewBackward) * Math.cos(RY * Math.PI / 180) / 4;
-            X += (-keys.viewForward + keys.viewBackward) * Math.sin(RY * Math.PI / 180) / 4;
+            var speed = (this.isShiftPress) ? Math.max(0.3,4-(this.forwardAcc+=0.01)) :4+0*(this.forwardAcc=0.01);  // 加速度
+            shiftInfo.innerHTML = 'speed:' + Math.round((100 / speed));
+            Z += (-keys.viewForward + keys.viewBackward) * Math.cos(RY * Math.PI / 180) / speed;
+            X += (-keys.viewForward + keys.viewBackward) * Math.sin(RY * Math.PI / 180) / speed;
+            
         }
         if (keys.viewLeft || keys.viewRight) { // 左右平移
             Z += (-keys.viewLeft + keys.viewRight) * Math.cos((RY + 90) * Math.PI / 180) / 10;
@@ -302,15 +319,17 @@ var ccgxk = {
             frameCount++;
             if(deltaTime > 1000){
                 var fps = frameCount / (deltaTime / 1000);
-                testinfo.innerHTML = ('<br>FPS: ' + fps.toFixed(2));
+                fpsInfo.innerHTML = ('<br>FPS: ' + fps.toFixed(2));
                 frameCount = 0;
                 lastTime = currentTime;
             }
-
-            requestAnimationFrame(viewAnimate);
+            if(_this.mainVPlayer !== null){  // 调试使用
+                posInfo.innerHTML = ('pos: x:' + Math.round(_this.mainVPlayer.body.position.x) + ' y:' + Math.round(_this.mainVPlayer.body.position.y) + ' z:' + Math.round(_this.mainVPlayer.body.position.z));
+            }
             _this.cannonAni(); // 物理世界计算
             _this.updataBodylist(); // 更新物体列表
             _this.mainVPlayerMove(_this.mainVPlayer); // 摄像机和主角的移动和旋转
+            requestAnimationFrame(viewAnimate);
         }
         viewAnimate();
     },
@@ -334,65 +353,32 @@ ccgxk.addPhysicalBox({  // 创建一个 旋转测试 细长物理体
 
 ccgxk.addPhysicalBox({  // 创建地面
     name: 'groundPlane', X: 0, Y: 0, Z: 0,
-    mass: 0, width: 2000, depth: 2000, height: 0.01,
+    mass: 0, width: 200000, depth: 200000, height: 0.01,
     texture: marble, background: '#FFF', mixValue: 0.71
 });
 
 
 
 
-var testBox = ccgxk.addPhysicalBox({  // 创建一个立方体，并设置为主角
+ccgxk.mainVPlayer = ccgxk.addPhysicalBox({  // 创建一个立方体，并设置为主角
     name: 'mainPlayer', X: 15, Y: 20, Z: 30,
     rX: 0, rY: 0, rZ: 0,
     mass: 5, texture: marble
 });
 
-ccgxk.mainVPlayer = testBox;
 
 function add10ranObj(number = 100){
     var yVlaue = 10;
     for(var i = 0; i < number; i++){  // 创建 10 个立方体
         ccgxk.addPhysicalBox({
-            X: Math.floor( Math.random() * 1800 + 1), Y: yVlaue, Z: Math.floor( Math.random() * 1800 + 1),
-            mass: 1, width: Math.floor( Math.random() * 3 + 1), depth: 5, height: Math.floor( Math.random() * 10 + 1),
+            X: -Math.floor( Math.random() * 750 + 1), Y: yVlaue, Z: -Math.floor( Math.random() * 370 + 1),
+            mass: 1, width: Math.floor( Math.random() * 30 + 1), depth: 5, height: Math.floor( Math.random() * 100 + 1),
             texture: marble, background: '#FFF', mixValue: 0.71
         });
     }
     console.log(ccgxk.bodylist.length);
 }
-
-
 add10ranObj();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -421,4 +407,11 @@ ccgxk.bodylist[1].body.updateMassProperties()  // 还要修改惯性张量
 破案了，是 WJS 的原因
 
 */
+
+/* 开始试验自定义面 */
+
+
+
+
+
 </script>
