@@ -63,8 +63,10 @@ var ccgxk = {
         this.world = new CANNON.World();
         this.world.gravity.set(0, -9.82, 0); // 地球重力9.82m/s²
         this.world.broadphase = new CANNON.NaiveBroadphase(); // 碰撞检测
-        this.world.solver.iterations = 10; // 物理迭代
+        this.world.solver.iterations = 2; // 物理迭代
         this.world.addContactMaterial(this.cannonDefaultCantactMaterial);
+        this.eventListener();  // 事件监听
+        this.animate(); // 动画
     },
 
     // 物理体列表
@@ -128,11 +130,13 @@ var ccgxk = {
     },
 
     // 键盘按键与操作状态值的对应
-    keyMap : { // 键盘按键与操作值的对应关系
+    keyMap : {
         'w': 'viewForward',
         's': 'viewBackward',
         'a': 'viewLeft',
         'd': 'viewRight',
+        'q': 'turnLeft',
+        'e': 'turnRight',
         'r': 'viewUp',
         'v': 'viewDown',
         'o': 'turnUp',
@@ -193,7 +197,7 @@ var ccgxk = {
         }
     },
 
-    // 计算视角移动参数
+    // 计算物体的移动参数
     calMovePara : function(X, Y, Z, RX, RY, RZ){
         const keys = this.keys;
         if (keys.viewForward || keys.viewBackward) { // 前后平移
@@ -225,25 +229,29 @@ var ccgxk = {
         return {  x: X,  y: Y,  z: Z,  rx: RX,  ry: RY,  rz: RZ  }
     },
 
+    // 摄像机的一些参数
+    mainCamera : {
+        rx: 0,
+        ry: 0,
+        rz: 0,
+    },
+
     // 主角物理体
     mainVPlayer : null,
 
     // 主角物理体的移动
     mainVPlayerMove : function(cannonObj){
         if(cannonObj === null){return};
-        const { position, quaternion } = cannonObj.body;
-        const { x, y, z, rx, ry, rz } = this.calMovePara(
-            position.x, position.y, position.z,
-            cannonObj.rX, cannonObj.rY, cannonObj.rZ
+        var vplayerBodyPos = cannonObj.body.position;
+        var vplayerBodyQua = cannonObj.body.quaternion;
+        var vplayerAct = this.calMovePara(  // 计算按键后的移动参数
+            vplayerBodyPos.x, vplayerBodyPos.y, vplayerBodyPos.z,
+            this.mainCamera.rx, this.mainCamera.ry, this.mainCamera.rz
         );
-        Object.assign(position, {  x,  y,  z  });
-        
-        cannonObj.rY = ry;
-        /* ------------[ 还未成熟的旋转，这是实验区 ]----------------- */
-        cannonObj.rZ = rz;
-        cannonObj.rX = rx;
-        // W.camera({ rx: rx, ry: ry, rz: rz });
-        /* ----------------------------- */
+        cannonObj.body.position = vplayerAct;
+        cannonObj.rY = vplayerAct.ry;  // 主角只旋转 Y 轴
+        this.mainCamera = vplayerAct;
+        W.camera({rx: vplayerAct.rx, rz: vplayerAct.rz})  // 摄像机只旋转 X 和 Z 轴
         return 0;
     },
 
@@ -264,12 +272,12 @@ var ccgxk = {
         
         viewAnimate();
     },
-
-
-
-
 }
+
+
+
 ccgxk.initWorld();
+W.camera({g: 'mainPlayer', z:7, y: 2.6});// 摄像机
 
 ccgxk.addPhysicalBox({  // 创建一个 测试 物理体
     name: 'test', X: -30, Y: 1, Z: -30,
@@ -282,32 +290,12 @@ ccgxk.addPhysicalBox({  // 创建地面
     texture: marble, background: '#FFF', mixValue: 0.71, rX: 0
 });
 
-// 小球的初始旋转
-var ballRX = 0;   var ballRY = 0;   var ballRZ = 0;
-
 ccgxk.mainVPlayer = ccgxk.addPhysicalBox({  // 创建一个立方体，并设置为主角
     name: 'mainPlayer', X: 15, Y: 20, Z: 30,
     rX: 0, rY: 0, rZ: 0,
     mass: 5, texture: marble
 })
 
-ccgxk.eventListener(); // 事件监听
-ccgxk.animate(); // 动画
-
-W.camera({g: 'mainPlayer', z:7, y: 2.6})// 摄像机
-
-/* ---------------------------------------------------------------------------------------- */
-
-// 原主角
-// const oldmainVPlayer = new CANNON.Body({
-//     mass: 5,
-//     shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)), // 立方体，边长为 1
-//     position: new CANNON.Vec3(30, 30, 30), // 位置
-//     material: ccgxk.cannonDefaultCantactMaterial,
-// });
-// ccgxk.world.addBody(oldmainVPlayer);
-// W.group({ n: "ball", x:30, y:1, z:30,rx:ballRX,ry:ballRY,rz:ballRZ});
-// W.cube({g:"ball",n:"ball_sphere",size:2, t:marble,s:0.8,rx:0,ry:0,rz:0});
 
 
 </script>
