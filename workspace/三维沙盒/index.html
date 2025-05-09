@@ -1,6 +1,6 @@
 <style>body{margin: 0;}</style>
 <script src="./js/w.js"></script>
-<script src="https://img1.ccgxk.com/jscdn/cannon.min.js"></script>
+<script src="./js/cannon.js"></script>
 <img src='./img/texture.jpeg' id=marble hidden>
 <canvas id=c width=320 height=300></canvas>
 <div id="testinfo"></div>
@@ -15,10 +15,10 @@ wMath = {
         const pitch = Math.asin(Math.max(-1, Math.min(1, sinPitch))); // Pitch (Y轴)
         const yaw = Math.atan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z)); // Yaw (Z轴)
         const toDeg = angle => angle * (180 / Math.PI); // 转为度数
-        return { x: toDeg(roll), y: toDeg(pitch), z: toDeg(yaw)};
+        return { rX: toDeg(roll), rY: toDeg(pitch), rZ: toDeg(yaw)};
     },
 
-    eulerToQuaternion: function(roll, pitch, yaw){  // 欧拉数转化为四元数
+    eulerToQuaternion: function(roll, pitch, yaw){  // 欧拉数转化为四元数（目前用不到）
         const rollRad = roll * (Math.PI / 180);
         const pitchRad = pitch * (Math.PI / 180);
         const yawRad = yaw * (Math.PI / 180);
@@ -34,7 +34,7 @@ c.width = window.innerWidth - 100
 c.height = window.innerHeight - 100
 W.reset(c);
 W.ambient(0.7);
-W.light({ x: .5, y: -.3, z: -.5});
+W.light({ x: 0.5, y: -.3, z: -.5});
 W.clearColor("8Af");
 
 // 绘制原点坐标轴
@@ -46,7 +46,22 @@ W.pyramid({g:'posZero',size:1,x:10,rz:-90,b:"f44"});
 W.pyramid({g:'posZero',size:1,y:10,b:"4f4"});
 W.pyramid({g:'posZero',size:1,z:10,rx:90,b:"44f"});
 
+// 项目对象
 var ccgxk = {
+    // 初始化物理世界
+    initWorld : function(){
+        W.camera({n:'camera'});  // 初始化相机
+        this.world = new CANNON.World();
+        this.world.gravity.set(0, -9.82, 0); // 地球重力9.82m/s²
+        // this.world.broadphase = new CANNON.NaiveBroadphase(); // 碰撞检测（所有刚体件都进行碰撞）
+        this.world.broadphase = new CANNON.SAPBroadphase(this.world) // SAP 分割
+        
+        this.world.solver.iterations = 1; // 物理迭代
+        this.world.addContactMaterial(this.cannonDefaultCantactMaterial);  // 默认材质关联
+        this.eventListener();  // 事件监听
+        this.animate(); // 动画
+    },
+
     // ccgxk 的 cannon.js 物理世界
     world : null,
 
@@ -58,21 +73,10 @@ var ccgxk = {
             restitution: 0.1, // 弹性系数
     }),
 
-    // 初始化物理世界
-    initWorld : function(){
-        this.world = new CANNON.World();
-        this.world.gravity.set(0, -9.82, 0); // 地球重力9.82m/s²
-        this.world.broadphase = new CANNON.NaiveBroadphase(); // 碰撞检测
-        this.world.solver.iterations = 2; // 物理迭代
-        this.world.addContactMaterial(this.cannonDefaultCantactMaterial);
-        this.eventListener();  // 事件监听
-        this.animate(); // 动画
-    },
-
     // 物理体列表
     bodylist : new Array(),
 
-    // 添加物理体
+    // 添加 box 物理体
     addPhysicalBox : function({ 
                 name = 'k'+(Math.random()*10**9|0),  // 如果没指认，则使用随机数生成 ID
                 X = 5, Y = 5, Z = 5,
@@ -101,6 +105,11 @@ var ccgxk = {
         for (let i = 0; i < this.bodylist.length; i++) {
             let indexItem = this.bodylist[i];
             let pos = indexItem.body.position;
+            let quat = indexItem.body.quaternion;
+            let indexItemEuler = wMath.quaternionToEuler(quat);
+            indexItem.rX = indexItemEuler.rX;
+            indexItem.rY = indexItemEuler.rY;
+            indexItem.rZ = indexItemEuler.rZ;
             W.move({
                 n: this.bodylist[i].name,
                 x: pos.x,
@@ -184,9 +193,8 @@ var ccgxk = {
 
     // 键盘事件处理逻辑
     _handleKey : function(e, value) {
-        if (this.keyMap[e.key.toLowerCase()]) {
-            this.keys[this.keyMap[e.key.toLowerCase()]] = value;
-        }
+        var action = this.keyMap[e.key.toLowerCase()];
+        if (action) { this.keys[action] = value; }
         if (e.keyCode === 32 && this.mainVPlayer !== null) {  // 空格键
             var limit = this.mainVPlayer.body.position.y <= 0;
             limit = true;
@@ -221,81 +229,183 @@ var ccgxk = {
         if(keys.turnUp || keys.turnDown) {  // 上下扭动
             var offset = (-keys.turnUp + keys.turnDown);
             if(Math.abs(offset) > 0.5){
-                // if ((offset > 0 && RX < 0) || (offset < 0 && RX > -180)) {  // 限制（测试中）
                 RX += offset;
-                // }
             }
         }
         return {  x: X,  y: Y,  z: Z,  rx: RX,  ry: RY,  rz: RZ  }
     },
 
-    // 摄像机的一些参数
-    mainCamera : {
-        rx: 0,
-        ry: 0,
-        rz: 0,
-    },
-
     // 主角物理体
     mainVPlayer : null,
 
-    // 主角物理体的移动
-    mainVPlayerMove : function(cannonObj){
-        if(cannonObj === null){return};
-        var vplayerBodyPos = cannonObj.body.position;
-        var vplayerBodyQua = cannonObj.body.quaternion;
-        var vplayerAct = this.calMovePara(  // 计算按键后的移动参数
+    // 摄像机的一些参数
+    mainCamera : {
+        groupName : null,
+        pos : {  // 相对坐标系，相对于主角
+            x: 0,
+            y: 2.6,
+            z: 7,
+        },
+        qua : {
+            rx: 0,
+            ry: 0,
+            rz: 0,
+        },
+    },
+
+    // 摄像机和主角的移动和旋转
+    mainVPlayerMove : function(mainVPlayerObj){
+        if(mainVPlayerObj === null){return};
+        var cam = this.mainCamera;
+        cam.groupName = mainVPlayerObj.name;
+        var vplayerBodyPos = mainVPlayerObj.body.position;
+        var vplayerBodyQua = mainVPlayerObj.body.quaternion;
+        var vplayerAct = this.calMovePara(  // 获取按键和鼠标事件处理后的移动参数
             vplayerBodyPos.x, vplayerBodyPos.y, vplayerBodyPos.z,
-            this.mainCamera.rx, this.mainCamera.ry, this.mainCamera.rz
+            cam.qua.rx, cam.qua.ry, cam.qua.rz
         );
-        cannonObj.body.position = vplayerAct;
-        cannonObj.rY = vplayerAct.ry;  // 主角只旋转 Y 轴
-        this.mainCamera = vplayerAct;
-        W.camera({rx: vplayerAct.rx, rz: vplayerAct.rz})  // 摄像机只旋转 X 和 Z 轴
+        mainVPlayerObj.body.position.x = vplayerAct.x;
+        mainVPlayerObj.body.position.y = vplayerAct.y;
+        mainVPlayerObj.body.position.z = vplayerAct.z;
+        cam.qua = vplayerAct;
+        vplayerBodyQua.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), Math.PI / 180 * vplayerAct.ry);  // 主角只旋转 Y 轴
+        W.camera({g:cam.groupName, x:cam.pos.x, y:cam.pos.y, z:cam.pos.z, rx: cam.qua.rx, rz: cam.qua.rz})  // 摄像机只旋转 X 和 Z 轴
         return 0;
+        
     },
 
-    // 物理世界运动的参数
+    // 进行一步物理世界的计算
     cannonAni : function(){
-        const timeStep = 1 / 60; // 时间步长
-        this.world.step(timeStep); // 更新物理世界
+        this.world.step(1 / 60); // 时间步长 1/60，更新物理世界
     },
 
+    // 动画循环
     animate : function(){
         _this = this;
+        lastTime = performance.now();
+        frameCount = 0; // FPS 计数器
         const viewAnimate = function() {
+
+            var currentTime = performance.now();
+            var deltaTime = currentTime - lastTime;
+            frameCount++;
+            if(deltaTime > 1000){
+                var fps = frameCount / (deltaTime / 1000);
+                testinfo.innerHTML = ('<br>FPS: ' + fps.toFixed(2));
+                frameCount = 0;
+                lastTime = currentTime;
+            }
+
             requestAnimationFrame(viewAnimate);
-            _this.cannonAni(); // 物理世界
+            _this.cannonAni(); // 物理世界计算
             _this.updataBodylist(); // 更新物体列表
-            _this.mainVPlayerMove(_this.mainVPlayer); // 主角移动
+            _this.mainVPlayerMove(_this.mainVPlayer); // 摄像机和主角的移动和旋转
         }
-        
         viewAnimate();
     },
 }
 
-
-
 ccgxk.initWorld();
-W.camera({g: 'mainPlayer', z:7, y: 2.6});// 摄像机
+
+
 
 ccgxk.addPhysicalBox({  // 创建一个 测试 物理体
     name: 'test', X: -30, Y: 1, Z: -30,
-    mass: 5, width: 10, depth: 15, height: 1, texture: marble
+    mass: 0, width: 10, depth: 15, height: 1, texture: marble
 });
+
+ccgxk.addPhysicalBox({  // 创建一个 旋转测试 细长物理体
+    name: 'longThin', X: 20, Y: 1, Z: -30,
+    mass: 1, width: 20, depth: 1, height: 1, texture: marble
+});
+
+
 
 ccgxk.addPhysicalBox({  // 创建地面
     name: 'groundPlane', X: 0, Y: 0, Z: 0,
-    mass: 0, width: 100, depth: 100, height: 0.01,
-    texture: marble, background: '#FFF', mixValue: 0.71, rX: 0
+    mass: 0, width: 2000, depth: 2000, height: 0.01,
+    texture: marble, background: '#FFF', mixValue: 0.71
 });
 
-ccgxk.mainVPlayer = ccgxk.addPhysicalBox({  // 创建一个立方体，并设置为主角
+
+
+
+var testBox = ccgxk.addPhysicalBox({  // 创建一个立方体，并设置为主角
     name: 'mainPlayer', X: 15, Y: 20, Z: 30,
     rX: 0, rY: 0, rZ: 0,
     mass: 5, texture: marble
-})
+});
+
+ccgxk.mainVPlayer = testBox;
+
+function add10ranObj(number = 100){
+    var yVlaue = 10;
+    for(var i = 0; i < number; i++){  // 创建 10 个立方体
+        ccgxk.addPhysicalBox({
+            X: Math.floor( Math.random() * 1800 + 1), Y: yVlaue, Z: Math.floor( Math.random() * 1800 + 1),
+            mass: 1, width: Math.floor( Math.random() * 3 + 1), depth: 5, height: Math.floor( Math.random() * 10 + 1),
+            texture: marble, background: '#FFF', mixValue: 0.71
+        });
+    }
+    console.log(ccgxk.bodylist.length);
+}
+
+
+add10ranObj();
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*笔记
+
+1. 修改 mass：
+
+ccgxk.bodylist[1].body.mass = 0
+ccgxk.bodylist[1].body.updateMassProperties()  // 还要修改惯性张量
+
+2. 物理迭代
+
+当 MASS = 0，
+物理迭代为 1 时，支持的最多的 mass=0 的 box 项目，约为 400~500 个
+物理迭代为 10 时，和上面也差不多
+
+当 MASS = 1，
+物理迭代为 1 时，支持的最多的 mass=0 的 box 项目，约为 300 个
+
+所以和 MASS 有关...
+
+但也可能是 W.js 的原因
+
+*/
 </script>
