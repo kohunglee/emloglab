@@ -4,8 +4,10 @@
 <img src='./img/texture.jpeg' id=marble hidden>
 <canvas id=c width=320 height=300></canvas>
 <div id="fpsInfo"></div>
-<div id="shiftInfo"></div>
-<div id="posInfo"></div>
+<span id="shiftInfo"></span> | 
+<span id="posInfo"></span> | 
+<span id="metrics"></span> |
+<span id="cpuInfo"></span>
 <script>
 
 "use strict";
@@ -65,6 +67,7 @@ var ccgxk = {
         this.world.addContactMaterial(this.cannonDefaultCantactMaterial);  // 默认材质关联
         this.eventListener();  // 事件监听
         this.animate(); // 动画
+        shiftInfo.innerHTML = 'speed:' + 25
     },
 
     // 默认材质关联材质
@@ -150,8 +153,8 @@ var ccgxk = {
         's': 'viewBackward',
         'a': 'viewLeft',
         'd': 'viewRight',
-        'q': 'turnLeft',
-        'e': 'turnRight',
+        // 'q': 'turnLeft',
+        // 'e': 'turnRight',
         'r': 'viewUp',
         'v': 'viewDown',
         'o': 'turnUp',
@@ -212,7 +215,7 @@ var ccgxk = {
             }
             this.keys.jumping = value;
         }
-        if (e.keyCode === 16) {  // shift键
+        if (e.keyCode === 16 || e.key.toLowerCase() === 'e') {  // shift键 或 q
             this.isShiftPress = value;
         }
     },
@@ -242,7 +245,7 @@ var ccgxk = {
     calMovePara : function(X, Y, Z, RX, RY, RZ){
         const keys = this.keys;
         if (keys.viewForward || keys.viewBackward) { // 前后平移
-            var speed = (this.isShiftPress) ? Math.max(0.3,4-(this.forwardAcc+=0.01)) :4+0*(this.forwardAcc=0.01);  // 加速度
+            var speed = (this.isShiftPress) ? Math.max(0.1,4-(this.forwardAcc+=0.01)) :4+0*(this.forwardAcc=0.01);  // 加速度
             shiftInfo.innerHTML = 'speed:' + Math.round((100 / speed));
             Z += (-keys.viewForward + keys.viewBackward) * Math.cos(RY * Math.PI / 180) / speed;
             X += (-keys.viewForward + keys.viewBackward) * Math.sin(RY * Math.PI / 180) / speed;
@@ -336,10 +339,6 @@ var ccgxk = {
         if(verticesData.length === 0 || indicesData.length === 0){ console.error('没有添加模型数据！');return; }
         // const myshape = this.returnVec3Data(verticesData.map(v => v * size), indicesData);
         const myshape = new CANNON.Trimesh(verticesData.map(v => v * size), indicesData);
-        console.log('下面这个');
-        console.log(myshape);
-
-
         const tempBody = new CANNON.Body({
             mass: mass,
             shape: myshape,
@@ -365,7 +364,7 @@ var ccgxk = {
     fpsFrameCount : 0,
     lastTime : performance.now(),
 
-    // 显示 FPS
+    // 显示 FPS 和 内存 等...
     showFPS : function(){
         var currentTime = performance.now();
         var deltaTime = currentTime - this.lastTime;
@@ -375,6 +374,18 @@ var ccgxk = {
             fpsInfo.innerHTML = ('<br>FPS: ' + fps.toFixed(2));
             this.fpsFrameCount = 0;
             this.lastTime = currentTime;
+            this._showMemory();  // 一秒显示一次内存，写在这里吧
+            this.displayPOS();  // 显示主角坐标
+        }
+    },
+
+    // 显示内存占用情况
+    _showMemory : function(){
+        var output = document.getElementById('metrics');
+        if (performance.memory) {
+            const mem = performance.memory;
+            output.innerHTML = `内存: ${(mem.usedJSHeapSize/1048576).toFixed(1)}MB/` +
+                    `${(mem.jsHeapSizeLimit/1048576).toFixed(1)}MB`;
         }
     },
 
@@ -409,7 +420,7 @@ ccgxk.addPhysicalBox({  // 创建一个 旋转测试 细长物理体
 
 ccgxk.addPhysicalBox({  // 创建地面
     name: 'groundPlane', X: 0, Y: -0.5, Z: 0,
-    mass: 0, width: 90, depth: 90, height: 1,
+    mass: 0, width: 900000, depth: 900000, height: 1,
     texture: marble, background: '#FFF', mixValue: 0.71
 });
 
@@ -422,7 +433,11 @@ ccgxk.mainVPlayer = ccgxk.addPhysicalBox({  // 创建一个立方体，并设置
     mass: 50, texture: marble
 });
 
-/* ---------- ---------- ---------- ---------- ---------- ---------- ----------*/
+/* ---------- ---------- ---------- ---------- ---------- ---------- ----------*/ /* ---------- ---------- ---------- ---------- ---------- ---------- ----------*/
+// 下面是废物区
+/* ---------- ---------- ---------- ---------- ---------- ---------- ----------*/ /* ---------- ---------- ---------- ---------- ---------- ---------- ----------*/
+
+
 
 // // 四面体
 var vertices = [0,0,0,  1,0,0,  0,1,3,  0,0,3, ];
@@ -457,7 +472,82 @@ ccgxk.addCustomDataObj({
 
 */
 
+class CPUMonitor {
+  constructor(sampleInterval = 1000) {
+    this.sampleInterval = sampleInterval;
+    this.lastTime = performance.now();
+    this.busyTime = 0;
+    this.sampleStart = 0;
+    this.usage = 0;
+    this.isRunning = false;
+  }
 
+  start() {
+    if (this.isRunning) return;
+    this.isRunning = true;
+    this.sampleStart = performance.now();
+    this._runMonitor();
+  }
+
+  stop() {
+    this.isRunning = false;
+  }
+
+  _runMonitor() {
+    if (!this.isRunning) return;
+
+    const now = performance.now();
+    const elapsed = now - this.lastTime;
+    
+    // 计算脚本执行时间（busy time）
+    const busyStart = performance.now();
+    this._doSomeWork(); // 模拟工作负载
+    const busyEnd = performance.now();
+    this.busyTime += busyEnd - busyStart;
+
+    // 定期采样
+    if (now - this.sampleStart >= this.sampleInterval) {
+      this.usage = (this.busyTime / (now - this.sampleStart)) * 100;
+      cpuInfo.innerHTML = (`CPU使用率: ${this.usage.toFixed(1)}%`);
+      
+      // 重置采样周期
+      this.sampleStart = now;
+      this.busyTime = 0;
+    }
+
+    this.lastTime = now;
+    requestAnimationFrame(() => this._runMonitor());
+  }
+
+  // 模拟工作负载（可根据实际需求调整）
+  _doSomeWork() {
+    let sum = 0;
+    for (let i = 0; i < 1000000; i++) {
+      sum += Math.random();
+    }
+    return sum;
+  }
+}
+
+// 使用示例
+const monitor = new CPUMonitor();
+monitor.start();
+
+// 停止监控（需要时调用）
+// monitor.stop();
+
+
+// 生成 100 个模型
+
+var yVlaue = 5;
+for(var i = 0; i < 100; i++){  // 创建 10 个立方体
+    ccgxk.addPhysicalBox({
+        X: -Math.floor( Math.random() * 7500 + 1), Y: yVlaue, Z: -Math.floor( Math.random() * 3700 + 1),
+        mass: 0, width: Math.floor( Math.random() * 30 + 1), depth: 5, height: Math.floor( Math.random() * 100 + 1),
+        texture: marble, background: '#FFF', mixValue: 0.71
+    });
+}
+console.log(ccgxk.bodylist.length);
 
 
 </script>
