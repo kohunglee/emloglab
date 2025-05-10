@@ -1,17 +1,15 @@
 <style>body{margin: 0;}</style>
-<script src="https://img1.ccgxk.com/wjs/w.js"></script>
+<script src="./js/w.js"></script>
 <script src="./js/cannon.js"></script>
 <img src='./img/texture.jpeg' id=marble hidden>
-<!-- <script src="https://xem.github.io/W/demos/mario.js"></script>
-<script src="https://xem.github.io/W/demos/mariotexture.js"></script> -->
-<!-- <script src="./js/mymode.js"></script> -->
 <canvas id=c width=320 height=300></canvas>
 <div id="fpsInfo"></div>
 <div id="shiftInfo"></div>
 <div id="posInfo"></div>
 <script>
-// import * as CANNON from './js/cannon-es.js';
 
+"use strict";
+    
 // 一些数学函数
 var wMath = {
     quaternionToEuler: function(q){  // 四元数转化为欧拉数
@@ -54,23 +52,20 @@ W.pyramid({g:'posZero', n:'test0001' ,size:1,z:10,rx:90,b:"44f"});
 
 // 项目对象
 var ccgxk = {
+    // ccgxk 的 cannon.js 物理世界
+        world : null,
+
     // 初始化物理世界
     initWorld : function(){
         W.camera({n:'camera'});  // 初始化相机
         this.world = new CANNON.World();
         this.world.gravity.set(0, -9.82, 0); // 地球重力9.82m/s²
         this.world.broadphase = new CANNON.NaiveBroadphase(); // 碰撞检测（所有刚体件都进行碰撞）
-        // this.world.broadphase = new CANNON.SAPBroadphase(this.world) // SAP 分割
-        // this.world.broadphase = new CANNON.GridBroadphase() // 网格分割
-        // this.world.allowSleep = true; // 允许睡眠
         this.world.solver.iterations = 20; // 物理迭代
         this.world.addContactMaterial(this.cannonDefaultCantactMaterial);  // 默认材质关联
         this.eventListener();  // 事件监听
         this.animate(); // 动画
     },
-
-    // ccgxk 的 cannon.js 物理世界
-    world : null,
 
     // 默认材质关联材质
     cannonDefaultCantactMaterial : new CANNON.ContactMaterial( // 默认材质关联材质
@@ -87,10 +82,12 @@ var ccgxk = {
     addPhysicalBox : function({ 
                 name = 'k'+(Math.random()*10**9|0),  // 如果没指认，则使用随机数生成 ID
                 X = 5, Y = 5, Z = 5,
-                mass = 0, width = 1, depth = 1, height = 1,
+                mass = 0, width = 1, depth = 1, height = 1, size = 1,
                 texture = null, smooth = 0,  // 因为 W.js 版本问题， smooth 暂时为 0
                 background = '#888', mixValue = 0.71, rX = 0, rY = 0, rZ = 0 } = {}){
-        
+        if(size !== 1){
+            width =  depth =  height = size;
+        }
         const body = new CANNON.Body({
             mass : mass,
             shape: new CANNON.Box(new CANNON.Vec3(width, height, depth)),
@@ -109,7 +106,7 @@ var ccgxk = {
         return result;
     },
 
-    // 按照列表将 物理体 逐个更新
+    // 按照列表将 物理体 逐个 物理计算 和 可视化 更新
     updataBodylist : function(){
         for (let i = 0; i < this.bodylist.length; i++) {
             let indexItem = this.bodylist[i];
@@ -131,23 +128,23 @@ var ccgxk = {
         }
     },
 
-    // 操作状态值
+    // 主角被手动操纵的状态值
     keys : {
-        viewForward: 0,
+        viewForward: 0,  // 向前移动
         viewBackward: 0,
         turnRight: 0,
-        turnLeft: 0,
+        turnLeft: 0,  // 向左旋转
         turnUp: 0,
         turnDown: 0,
         viewUp: 0,
         viewDown: 0,
-        viewLeft: 0,
+        viewLeft: 0,  // 向左移动
         viewRight: 0,
         shiftKeyvalue: 0,
         jumping: 0,
     },
 
-    // 键盘按键与操作状态值的对应
+    // 键盘按键 与 操作状态值 的对应
     keyMap : {
         'w': 'viewForward',
         's': 'viewBackward',
@@ -167,6 +164,7 @@ var ccgxk = {
         'arrowright': 'turnRight',
     },
 
+    // 是否按下了 shift 键
     isShiftPress : 0,
 
     // 事件监听
@@ -185,7 +183,7 @@ var ccgxk = {
                 _this.keys.turnUp = e.movementY * 0.1;
             }
         });
-        c.addEventListener('click', () => {  // 点击画布，开启虚拟鼠标
+        c.addEventListener('click', () => {  // 单击画布，开启虚拟鼠标
             c.requestPointerLock = c.requestPointerLock || c.mozRequestPointerLock || c.webkitRequestPointerLock;
             c.requestPointerLock();
             isMouseMove = true;
@@ -226,9 +224,19 @@ var ccgxk = {
         cam.groupName = mainVPlayerObj.name;
     },
 
+    // 向前（后）移动的加速度辅助计算值
     forwardAcc : 0,
 
-
+    displayPOS : function(){
+        var posInfo = document.getElementById('posInfo');
+        if(this.mainVPlayer !== null){
+            posInfo.innerHTML = (
+                'pos: x:' + Math.round(this.mainVPlayer.body.position.x) +
+                ', y:' + Math.round(this.mainVPlayer.body.position.y) +
+                ', z:' + Math.round(this.mainVPlayer.body.position.z)
+            );
+        }
+    },
 
     // 计算物体的移动参数
     calMovePara : function(X, Y, Z, RX, RY, RZ){
@@ -238,24 +246,12 @@ var ccgxk = {
             shiftInfo.innerHTML = 'speed:' + Math.round((100 / speed));
             Z += (-keys.viewForward + keys.viewBackward) * Math.cos(RY * Math.PI / 180) / speed;
             X += (-keys.viewForward + keys.viewBackward) * Math.sin(RY * Math.PI / 180) / speed;
-            if(this.mainVPlayer !== null){  // 调试使用
-                posInfo.innerHTML = (
-                    'pos: x:' + Math.round(this.mainVPlayer.body.position.x) +
-                    ', y:' + Math.round(this.mainVPlayer.body.position.y) +
-                    ', z:' + Math.round(this.mainVPlayer.body.position.z)
-                );
-            }
+            this.displayPOS();
         }
         if (keys.viewLeft || keys.viewRight) { // 左右平移
             Z += (-keys.viewLeft + keys.viewRight) * Math.cos((RY + 90) * Math.PI / 180) / 10;
             X += (-keys.viewLeft + keys.viewRight) * Math.sin((RY + 90) * Math.PI / 180) / 10;
-            if(this.mainVPlayer !== null){  // 调试使用
-                posInfo.innerHTML = (
-                    'pos: x:' + Math.round(this.mainVPlayer.body.position.x) +
-                    ', y:' + Math.round(this.mainVPlayer.body.position.y) +
-                    ', z:' + Math.round(this.mainVPlayer.body.position.z)
-                );
-            }
+            this.displayPOS();
         }
         if (keys.viewUp || keys.viewDown) { // 上下平移
             var offset = (keys.viewUp - keys.viewDown) / 7;
@@ -282,7 +278,7 @@ var ccgxk = {
     // 摄像机的一些参数
     mainCamera : {
         groupName : null,
-        pos : {  // 相对坐标系，相对于主角
+        pos : {  // 相对坐标系，相对于主角（下面 qua 也是）
             x: 0,
             y: 2.6,
             z: 7,
@@ -315,27 +311,78 @@ var ccgxk = {
         
     },
 
-    // 进行一步物理世界的计算
+    // 将顶点数据转化成 cannon.js 可用的格式
+    returnVec3Data : function(verticesData, indicesData){
+        const vertices = [];
+        for (let i = 0; i < verticesData.length; i += 3) {
+            vertices.push(new CANNON.Vec3(verticesData[i], verticesData[i + 1], verticesData[i + 2]));
+        }
+        const faces = [];
+        for (let i = 0; i < indicesData.length; i += 3) {
+            faces.push([indicesData[i], indicesData[i + 1], indicesData[i + 2]]);
+        }
+        const convexPolyhedron = new CANNON.ConvexPolyhedron(vertices, faces);
+        return convexPolyhedron;
+    },
+
+    // 添加自定义顶点数据的物体
+    addCustomDataObj : function({ 
+                name = 'custom'+(Math.random()*10**9|0),  // 如果没指认，则使用随机数生成 ID
+                X = 5, Y = 5, Z = 5,
+                mass = 0, size = 1,
+                verticesData = [], indicesData = [],
+                texture = null, smooth = 0,  // 因为 W.js 版本问题， smooth 暂时为 0
+                background = '#888', mixValue = 0.71, rX = 0, rY = 0, rZ = 0 } = {}){
+        if(verticesData.length === 0 || indicesData.length === 0){ console.error('没有添加模型数据！');return; }
+        // const myshape = this.returnVec3Data(verticesData.map(v => v * size), indicesData);
+        const myshape = new CANNON.Trimesh(verticesData.map(v => v * size), indicesData);
+        console.log('下面这个');
+        console.log(myshape);
+
+
+        const tempBody = new CANNON.Body({
+            mass: mass,
+            shape: myshape,
+            position: new CANNON.Vec3(X, Y, Z),
+            material: this.cannonDefaultCantactMaterial,
+        });
+        this.world.addBody(tempBody);
+        W.add(name, {  // W 引擎引入模型数据
+            vertices: verticesData,
+            indices: indicesData,
+        });
+        W[name]({n:name,size: size, x:X, z:Z, y:Y});  // 可能会造成重复添加同一种模型，之后要改
+        var result = {name: name, body: tempBody, rX: 0, rY: 0, rZ: 0};
+        this.bodylist.push(result);  // 向 CCGXK 项目内追加
+    },
+
+    // 计算一次物理世界
     cannonAni : function(){
-        this.world.step(1 / 60); // 时间步长 1/60，更新物理世界
+        this.world.step(1 / 60); // 时间步长 1/60，用于更新物理世界
+    },
+
+    // FPS 计算的辅助值
+    fpsFrameCount : 0,
+    lastTime : performance.now(),
+
+    // 显示 FPS
+    showFPS : function(){
+        var currentTime = performance.now();
+        var deltaTime = currentTime - this.lastTime;
+        this.fpsFrameCount++;
+        if(deltaTime > 1000){
+            var fps = this.fpsFrameCount / (deltaTime / 1000);
+            fpsInfo.innerHTML = ('<br>FPS: ' + fps.toFixed(2));
+            this.fpsFrameCount = 0;
+            this.lastTime = currentTime;
+        }
     },
 
     // 动画循环
     animate : function(){
         var _this = this;
-        var lastTime = performance.now();
-        var frameCount = 0; // FPS 计数器
         const viewAnimate = function() {
-
-            var currentTime = performance.now();
-            var deltaTime = currentTime - lastTime;
-            frameCount++;
-            if(deltaTime > 1000){
-                var fps = frameCount / (deltaTime / 1000);
-                fpsInfo.innerHTML = ('<br>FPS: ' + fps.toFixed(2));
-                frameCount = 0;
-                lastTime = currentTime;
-            }
+            _this.showFPS(); // 显示 FPS
             _this.cannonAni(); // 物理世界计算
             _this.updataBodylist(); // 更新物体列表
             _this.mainVPlayerMove(_this.mainVPlayer); // 摄像机和主角的移动和旋转
@@ -344,14 +391,13 @@ var ccgxk = {
         viewAnimate();
     },
 }
-
 ccgxk.initWorld();
-
+var list = ccgxk.bodylist;
 
 
 ccgxk.addPhysicalBox({  // 创建一个 测试 物理体
     name: 'test', X: -30, Y: 1, Z: -30,
-    mass: 0, width: 10, depth: 15, height: 1, texture: marble
+    mass: 0, width: 20, depth: 25, height: 1, texture: marble
 });
 
 ccgxk.addPhysicalBox({  // 创建一个 旋转测试 细长物理体
@@ -363,7 +409,7 @@ ccgxk.addPhysicalBox({  // 创建一个 旋转测试 细长物理体
 
 ccgxk.addPhysicalBox({  // 创建地面
     name: 'groundPlane', X: 0, Y: -0.5, Z: 0,
-    mass: 0, width: 200000, depth: 200000, height: 1,
+    mass: 0, width: 90, depth: 90, height: 1,
     texture: marble, background: '#FFF', mixValue: 0.71
 });
 
@@ -372,146 +418,45 @@ ccgxk.addPhysicalBox({  // 创建地面
 
 ccgxk.mainVPlayer = ccgxk.addPhysicalBox({  // 创建一个立方体，并设置为主角
     name: 'mainPlayer', X: 15, Y: 20, Z: 30,
-    rX: 0, rY: 0, rZ: 0,
-    mass: 5, texture: marble
+    rX: 0, rY: 0, rZ: 0, size:1,
+    mass: 50, texture: marble
 });
 
+/* ---------- ---------- ---------- ---------- ---------- ---------- ----------*/
 
-// function add10ranObj(number = 100){
-//     var yVlaue = 10;
-//     for(var i = 0; i < number; i++){  // 创建 10 个立方体
-//         ccgxk.addPhysicalBox({
-//             X: -Math.floor( Math.random() * 750 + 1), Y: yVlaue, Z: -Math.floor( Math.random() * 370 + 1),
-//             mass: 1, width: Math.floor( Math.random() * 30 + 1), depth: 5, height: Math.floor( Math.random() * 100 + 1),
-//             texture: marble, background: '#FFF', mixValue: 0.71
-//         });
-//     }
-//     console.log(ccgxk.bodylist.length);
-// }
-// add10ranObj();
+// // 四面体
+var vertices = [0,0,0,  1,0,0,  0,1,3,  0,0,3, ];
+var indices = [0,3,2,  0,1,3,  0,2,1,  1,2,3,  ];
 
 
+// var vertices = [0,0,10,0,3.33,10,0,3.33,6.67,0,0,6.67,3.33,3.33,6.67,3.33,0,6.67,3.33,3.33,10,3.33,0,10,0,3.33,10,0,0,10,0,0,6.67,0,0,10,0,3.33,6.67,0,3.33,10,6.67,0,3.33,6.67,3.33,3.33,6.67,3.33,0,6.67,0,0,10,3.33,0,10,0,0,10,3.33,3.33,10,0,3.33,6.67,3.33,3.33,6.67,0,3.33,6.67,0,0,6.67,0,3.33,6.67,3.33,0,6.67,3.33,3.33] ;
+// var indices = [0,1,2,0,2,3,3,2,4,3,4,5,5,4,6,5,6,7,7,6,8,7,8,9,10,5,7,10,7,11,4,12,13,4,13,6,14,15,16,14,16,17,17,16,18,17,18,19,19,18,20,19,20,21,21,20,22,21,22,23,24,19,21,24,21,25,18,26,27,18,27,20];
+ccgxk.addCustomDataObj({
+    name: 'custom',
+    X: 0, Y: 15, Z: 0,
+    size : 10,
+    mass: 0,
+    verticesData: vertices,
+    indicesData: indices,
+    texture: marble
+})
 
+ccgxk.addCustomDataObj({
+    name: 'custom2',
+    X: 0, Y: 15, Z: 0,
+    size : 10,
+    mass: 1,
+    verticesData: vertices,
+    indicesData: indices,
+    texture: marble
+})
 
+/* 
 
-/*笔记
-
-1. 修改 mass：
-
-ccgxk.bodylist[1].body.mass = 0
-ccgxk.bodylist[1].body.updateMassProperties()  // 还要修改惯性张量
-
-2. 物理迭代
-
-当 MASS = 0，
-物理迭代为 1 时，支持的最多的 mass=0 的 box 项目，约为 400~500 个
-物理迭代为 10 时，和上面也差不多
-
-当 MASS = 1，
-物理迭代为 1 时，支持的最多的 mass=0 的 box 项目，约为 300 个
-
-所以和 MASS 有关...
-
-但也可能是 W.js 的原因
-
-破案了，是 WJS 的原因
+第一，不能有 0.5
 
 */
 
-/* 开始试验自定义面 */
-
-// 假设你已经解析了 OBJ 文件，并得到了顶点和面的数据
-
-
-// var vertices = [5,0,0,5,10,5,5.98,0,.1,6.91,0,.38,7.78,0,.84,8.54,0,1.46,9.16,0,2.22,9.62,0,3.09,9.9,0,4.02,10,0,5,9.9,0,5.98,9.62,0,6.91,9.16,0,7.78,8.54,0,8.54,7.78,0,9.16,6.91,0,9.62,5.98,0,9.9,5,0,10,4.02,0,9.9,3.09,0,9.62,2.22,0,9.16,1.46,0,8.54,.84,0,7.78,.38,0,6.91,.1,0,5.98,0,0,5,.1,0,4.02,.38,0,3.09,.84,0,2.22,1.46,0,1.46,2.22,0,.84,3.09,0,.38,5,0,0,5.98,0,.1,6.91,0,.38,7.78,0,.84,8.54,0,1.46,9.16,0,2.22,9.62,0,3.09,9.9,0,4.02,10,0,5,9.9,0,5.98,9.62,0,6.91,9.16,0,7.78,8.54,0,8.54,7.78,0,9.16,6.91,0,9.62,5.98,0,9.9,5,0,10,4.02,0,9.9,3.09,0,9.62,2.22,0,9.16,1.46,0,8.54,.84,0,7.78,.38,0,6.91,.1,0,5.98,0,0,5,.1,0,4.02,.38,0,3.09,.84,0,2.22,1.46,0,1.46,2.22,0,.84,3.09,0,.38,4.02,0,.1,4.02,0,.1].map(x=>x/10);
-// var uv = [.25,.49,.25,.25,.3,.49,.34,.47,.38,.45,.42,.42,.45,.38,.47,.34,.49,.3,.49,.25,.49,.2,.47,.16,.45,.12,.42,.08,.38,.05,.34,.03,.3,.01,.25,.01,.2,.01,.16,.03,.12,.05,.08,.08,.05,.12,.03,.16,.01,.2,.01,.25,.01,.3,.03,.34,.05,.38,.08,.42,.12,.45,.16,.47,.75,.49,.8,.49,.84,.47,.88,.45,.92,.42,.95,.38,.97,.34,.99,.3,.99,.25,.99,.2,.97,.16,.95,.12,.92,.08,.88,.05,.84,.03,.8,.01,.75,.01,.7,.01,.66,.03,.62,.05,.58,.08,.55,.12,.53,.16,.51,.2,.51,.25,.51,.3,.53,.34,.55,.38,.58,.42,.62,.45,.66,.47,.7,.49,.2,.49];
-// var indices = [0,1,2,2,1,3,3,1,4,4,1,5,5,1,6,6,1,7,7,1,8,8,1,9,9,1,10,10,1,11,11,1,12,12,1,13,13,1,14,14,1,15,15,1,16,16,1,17,17,1,18,18,1,19,19,1,20,20,1,21,21,1,22,22,1,23,23,1,24,24,1,25,25,1,26,26,1,27,27,1,28,28,1,29,29,1,30,30,1,31,32,33,34,32,34,35,32,35,36,32,36,37,32,37,38,32,38,39,32,39,40,32,40,41,32,41,42,32,42,43,32,43,44,32,44,45,32,45,46,32,46,47,32,47,48,32,48,49,32,49,50,32,50,51,32,51,52,32,52,53,32,53,54,32,54,55,32,55,56,32,56,57,32,57,58,32,58,59,32,59,60,32,60,61,32,61,62,32,62,63,31,1,64,64,1,0];
-
-
-// const vertices = [1, -1, -1, 1, -1, 1, -1, -1, 1, -1, -1, -1, 1, 1, -1, 1, 1, 1, -1, 1, 1, -1, 1, -1];
-// const indices = [0, 1, 2, 0, 2, 3, 4, 7, 6, 4, 6, 5, 1, 5, 6, 1, 6, 2, 2, 6, 7, 2, 7, 3, 4, 0, 3, 4, 3, 7, 0, 4, 5, 0, 5, 1];
-
-
-var _verts = [new CANNON.Vec3(0,0,0),
-                         new CANNON.Vec3(2,0,0),
-                         new CANNON.Vec3(0,2,0),
-                         new CANNON.Vec3(0,0,2)];
-
-var _faces = [
-            [0,3,2], // -x
-            [0,1,3], // -y
-            [0,2,1], // -z
-            [1,2,3], // +xyz
-        ]
-
-const vertices = [0,0,0, 2,0,0, 0,2,0, 0,0,2]
-const indices = [0,3,2, 0,1,3, 0,2,1, 1,2,3];
-       
-
-
-// 将扁平化的顶点数据、索引数据转换为 CANNON.Vec3 对象的数组
-function returnVec3Data(verticesData, indicesData){
-    const vertices = [];
-    for (let i = 0; i < verticesData.length; i += 3) {
-        vertices.push(new CANNON.Vec3(verticesData[i], verticesData[i + 1], verticesData[i + 2]));
-    }
-    const faces = [];
-    for (let i = 0; i < indicesData.length; i += 3) {
-        faces.push([indicesData[i], indicesData[i + 1], indicesData[i + 2]]);
-    }
-    const convexPolyhedron = new CANNON.ConvexPolyhedron(vertices, faces);
-    return convexPolyhedron;
-}
-
-// console.log('下面是 box');
-// console.log(new CANNON.Box(new CANNON.Vec3(1, 1, 1)));
-// console.log('下面是 四面体');
-
-// // 创建一个 ConvexPolyhedron 形状
-const shape = returnVec3Data(vertices, indices);
-
-// console.log(shape);
-
-const testbody = new CANNON.Body({
-  mass: 1, // 质量
-//   shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)),
-//   shape: shape,
-  shape: new CANNON.ConvexPolyhedron(_verts, _faces),
-  position: new CANNON.Vec3(-26, 50, -25),
-//   quaternion: new CANNON.Quaternion(),
-//   material: ccgxk.cannonDefaultCantactMaterial,
-});
-ccgxk.world.addBody(testbody);
-
-W.add("zhuiti", {
-  vertices: vertices,
-  indices: indices,
-//   uv: uv,
-});
-
-W.zhuiti({n:"testtestbody",size: 1, x:-26,z:-25,y:50});
-var testresult = {name: 'testtestbody', body: testbody, rX: 0, rY: 0, rZ: 0};
-
-ccgxk.bodylist.push(testresult);      // W 的属性还是有点问题~~
-
-// W.add("zhuiti", {
-//               vertices: [5,0,0,5,10,5,5.98,0,.1,6.91,0,.38,7.78,0,.84,8.54,0,1.46,9.16,0,2.22,9.62,0,3.09,9.9,0,4.02,10,0,5,9.9,0,5.98,9.62,0,6.91,9.16,0,7.78,8.54,0,8.54,7.78,0,9.16,6.91,0,9.62,5.98,0,9.9,5,0,10,4.02,0,9.9,3.09,0,9.62,2.22,0,9.16,1.46,0,8.54,.84,0,7.78,.38,0,6.91,.1,0,5.98,0,0,5,.1,0,4.02,.38,0,3.09,.84,0,2.22,1.46,0,1.46,2.22,0,.84,3.09,0,.38,5,0,0,5.98,0,.1,6.91,0,.38,7.78,0,.84,8.54,0,1.46,9.16,0,2.22,9.62,0,3.09,9.9,0,4.02,10,0,5,9.9,0,5.98,9.62,0,6.91,9.16,0,7.78,8.54,0,8.54,7.78,0,9.16,6.91,0,9.62,5.98,0,9.9,5,0,10,4.02,0,9.9,3.09,0,9.62,2.22,0,9.16,1.46,0,8.54,.84,0,7.78,.38,0,6.91,.1,0,5.98,0,0,5,.1,0,4.02,.38,0,3.09,.84,0,2.22,1.46,0,1.46,2.22,0,.84,3.09,0,.38,4.02,0,.1,4.02,0,.1].map(x=>x/10),
-//               uv: [.25,.49,.25,.25,.3,.49,.34,.47,.38,.45,.42,.42,.45,.38,.47,.34,.49,.3,.49,.25,.49,.2,.47,.16,.45,.12,.42,.08,.38,.05,.34,.03,.3,.01,.25,.01,.2,.01,.16,.03,.12,.05,.08,.08,.05,.12,.03,.16,.01,.2,.01,.25,.01,.3,.03,.34,.05,.38,.08,.42,.12,.45,.16,.47,.75,.49,.8,.49,.84,.47,.88,.45,.92,.42,.95,.38,.97,.34,.99,.3,.99,.25,.99,.2,.97,.16,.95,.12,.92,.08,.88,.05,.84,.03,.8,.01,.75,.01,.7,.01,.66,.03,.62,.05,.58,.08,.55,.12,.53,.16,.51,.2,.51,.25,.51,.3,.53,.34,.55,.38,.58,.42,.62,.45,.66,.47,.7,.49,.2,.49],
-//               indices: [0,1,2,2,1,3,3,1,4,4,1,5,5,1,6,6,1,7,7,1,8,8,1,9,9,1,10,10,1,11,11,1,12,12,1,13,13,1,14,14,1,15,15,1,16,16,1,17,17,1,18,18,1,19,19,1,20,20,1,21,21,1,22,22,1,23,23,1,24,24,1,25,25,1,26,26,1,27,27,1,28,28,1,29,29,1,30,30,1,31,32,33,34,32,34,35,32,35,36,32,36,37,32,37,38,32,38,39,32,39,40,32,40,41,32,41,42,32,42,43,32,43,44,32,44,45,32,45,46,32,46,47,32,47,48,32,48,49,32,49,50,32,50,51,32,51,52,32,52,53,32,53,54,32,54,55,32,55,56,32,56,57,32,57,58,32,58,59,32,59,60,32,60,61,32,61,62,32,62,63,31,1,64,64,1,0]
-//             });
-//             W.zhuiti({n:"obj",size: 5,y:2});
-
-
-
-// W.add("modeTest", {
-//   vertices: [1,-1,-1,1,-1,1,-1,-1,1,-1,-1,-1,1,1,-1,1,1,1,-1,1,1,-1,1,-1],
-//   indices: [0,1,2,0,2,3,4,7,6,4,6,5,1,5,6,1,6,2,2,6,7,2,7,3,4,0,3,4,3,7,0,4,5,0,5,1]
-// });
-
-
-
-
-// 现在你可以继续进行物理模拟
 
 
 
