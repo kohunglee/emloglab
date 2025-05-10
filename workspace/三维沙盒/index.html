@@ -1,9 +1,10 @@
 <style>body{margin: 0;}</style>
-<script src="./js/w.js"></script>
+<script src="https://img1.ccgxk.com/wjs/w.js"></script>
 <script src="./js/cannon.js"></script>
 <img src='./img/texture.jpeg' id=marble hidden>
-<script src="https://xem.github.io/W/demos/mario.js"></script>
-<script src="https://xem.github.io/W/demos/mariotexture.js"></script>
+<!-- <script src="https://xem.github.io/W/demos/mario.js"></script>
+<script src="https://xem.github.io/W/demos/mariotexture.js"></script> -->
+<!-- <script src="./js/mymode.js"></script> -->
 <canvas id=c width=320 height=300></canvas>
 <div id="fpsInfo"></div>
 <div id="shiftInfo"></div>
@@ -51,8 +52,6 @@ W.pyramid({g:'posZero',size:1,x:10,rz:-90,b:"f44"});
 W.pyramid({g:'posZero',size:1,y:10,b:"4f4"});
 W.pyramid({g:'posZero', n:'test0001' ,size:1,z:10,rx:90,b:"44f"});
 
-
-
 // 项目对象
 var ccgxk = {
     // 初始化物理世界
@@ -60,8 +59,8 @@ var ccgxk = {
         W.camera({n:'camera'});  // 初始化相机
         this.world = new CANNON.World();
         this.world.gravity.set(0, -9.82, 0); // 地球重力9.82m/s²
-        // this.world.broadphase = new CANNON.NaiveBroadphase(); // 碰撞检测（所有刚体件都进行碰撞）
-        this.world.broadphase = new CANNON.SAPBroadphase(this.world) // SAP 分割
+        this.world.broadphase = new CANNON.NaiveBroadphase(); // 碰撞检测（所有刚体件都进行碰撞）
+        // this.world.broadphase = new CANNON.SAPBroadphase(this.world) // SAP 分割
         // this.world.broadphase = new CANNON.GridBroadphase() // 网格分割
         // this.world.allowSleep = true; // 允许睡眠
         this.world.solver.iterations = 20; // 物理迭代
@@ -89,13 +88,14 @@ var ccgxk = {
                 name = 'k'+(Math.random()*10**9|0),  // 如果没指认，则使用随机数生成 ID
                 X = 5, Y = 5, Z = 5,
                 mass = 0, width = 1, depth = 1, height = 1,
-                texture = null, smooth = 0.8, background = '#888', mixValue = 0.71, rX = 0, rY = 0, rZ = 0 } = {}){
+                texture = null, smooth = 0,  // 因为 W.js 版本问题， smooth 暂时为 0
+                background = '#888', mixValue = 0.71, rX = 0, rY = 0, rZ = 0 } = {}){
         
         const body = new CANNON.Body({
             mass : mass,
             shape: new CANNON.Box(new CANNON.Vec3(width, height, depth)),
             position: new CANNON.Vec3(X, Y, Z),
-            material: ccgxk.cannonDefaultCantactMaterial,
+            material: this.cannonDefaultCantactMaterial,
         });
         this.world.addBody(body);
         W.cube({
@@ -120,7 +120,7 @@ var ccgxk = {
             indexItem.rY = indexItemEuler.rY;
             indexItem.rZ = indexItemEuler.rZ;
             W.move({
-                n: this.bodylist[i].name,
+                n: indexItem.name,
                 x: pos.x,
                 y: pos.y,
                 z: pos.z,
@@ -238,11 +238,24 @@ var ccgxk = {
             shiftInfo.innerHTML = 'speed:' + Math.round((100 / speed));
             Z += (-keys.viewForward + keys.viewBackward) * Math.cos(RY * Math.PI / 180) / speed;
             X += (-keys.viewForward + keys.viewBackward) * Math.sin(RY * Math.PI / 180) / speed;
-            
+            if(this.mainVPlayer !== null){  // 调试使用
+                posInfo.innerHTML = (
+                    'pos: x:' + Math.round(this.mainVPlayer.body.position.x) +
+                    ', y:' + Math.round(this.mainVPlayer.body.position.y) +
+                    ', z:' + Math.round(this.mainVPlayer.body.position.z)
+                );
+            }
         }
         if (keys.viewLeft || keys.viewRight) { // 左右平移
             Z += (-keys.viewLeft + keys.viewRight) * Math.cos((RY + 90) * Math.PI / 180) / 10;
             X += (-keys.viewLeft + keys.viewRight) * Math.sin((RY + 90) * Math.PI / 180) / 10;
+            if(this.mainVPlayer !== null){  // 调试使用
+                posInfo.innerHTML = (
+                    'pos: x:' + Math.round(this.mainVPlayer.body.position.x) +
+                    ', y:' + Math.round(this.mainVPlayer.body.position.y) +
+                    ', z:' + Math.round(this.mainVPlayer.body.position.z)
+                );
+            }
         }
         if (keys.viewUp || keys.viewDown) { // 上下平移
             var offset = (keys.viewUp - keys.viewDown) / 7;
@@ -323,9 +336,6 @@ var ccgxk = {
                 frameCount = 0;
                 lastTime = currentTime;
             }
-            if(_this.mainVPlayer !== null){  // 调试使用
-                posInfo.innerHTML = ('pos: x:' + Math.round(_this.mainVPlayer.body.position.x) + ' y:' + Math.round(_this.mainVPlayer.body.position.y) + ' z:' + Math.round(_this.mainVPlayer.body.position.z));
-            }
             _this.cannonAni(); // 物理世界计算
             _this.updataBodylist(); // 更新物体列表
             _this.mainVPlayerMove(_this.mainVPlayer); // 摄像机和主角的移动和旋转
@@ -352,8 +362,8 @@ ccgxk.addPhysicalBox({  // 创建一个 旋转测试 细长物理体
 
 
 ccgxk.addPhysicalBox({  // 创建地面
-    name: 'groundPlane', X: 0, Y: 0, Z: 0,
-    mass: 0, width: 200000, depth: 200000, height: 0.01,
+    name: 'groundPlane', X: 0, Y: -0.5, Z: 0,
+    mass: 0, width: 200000, depth: 200000, height: 1,
     texture: marble, background: '#FFF', mixValue: 0.71
 });
 
@@ -367,18 +377,18 @@ ccgxk.mainVPlayer = ccgxk.addPhysicalBox({  // 创建一个立方体，并设置
 });
 
 
-function add10ranObj(number = 100){
-    var yVlaue = 10;
-    for(var i = 0; i < number; i++){  // 创建 10 个立方体
-        ccgxk.addPhysicalBox({
-            X: -Math.floor( Math.random() * 750 + 1), Y: yVlaue, Z: -Math.floor( Math.random() * 370 + 1),
-            mass: 1, width: Math.floor( Math.random() * 30 + 1), depth: 5, height: Math.floor( Math.random() * 100 + 1),
-            texture: marble, background: '#FFF', mixValue: 0.71
-        });
-    }
-    console.log(ccgxk.bodylist.length);
-}
-add10ranObj();
+// function add10ranObj(number = 100){
+//     var yVlaue = 10;
+//     for(var i = 0; i < number; i++){  // 创建 10 个立方体
+//         ccgxk.addPhysicalBox({
+//             X: -Math.floor( Math.random() * 750 + 1), Y: yVlaue, Z: -Math.floor( Math.random() * 370 + 1),
+//             mass: 1, width: Math.floor( Math.random() * 30 + 1), depth: 5, height: Math.floor( Math.random() * 100 + 1),
+//             texture: marble, background: '#FFF', mixValue: 0.71
+//         });
+//     }
+//     console.log(ccgxk.bodylist.length);
+// }
+// add10ranObj();
 
 
 
@@ -410,7 +420,98 @@ ccgxk.bodylist[1].body.updateMassProperties()  // 还要修改惯性张量
 
 /* 开始试验自定义面 */
 
+// 假设你已经解析了 OBJ 文件，并得到了顶点和面的数据
 
+
+// var vertices = [5,0,0,5,10,5,5.98,0,.1,6.91,0,.38,7.78,0,.84,8.54,0,1.46,9.16,0,2.22,9.62,0,3.09,9.9,0,4.02,10,0,5,9.9,0,5.98,9.62,0,6.91,9.16,0,7.78,8.54,0,8.54,7.78,0,9.16,6.91,0,9.62,5.98,0,9.9,5,0,10,4.02,0,9.9,3.09,0,9.62,2.22,0,9.16,1.46,0,8.54,.84,0,7.78,.38,0,6.91,.1,0,5.98,0,0,5,.1,0,4.02,.38,0,3.09,.84,0,2.22,1.46,0,1.46,2.22,0,.84,3.09,0,.38,5,0,0,5.98,0,.1,6.91,0,.38,7.78,0,.84,8.54,0,1.46,9.16,0,2.22,9.62,0,3.09,9.9,0,4.02,10,0,5,9.9,0,5.98,9.62,0,6.91,9.16,0,7.78,8.54,0,8.54,7.78,0,9.16,6.91,0,9.62,5.98,0,9.9,5,0,10,4.02,0,9.9,3.09,0,9.62,2.22,0,9.16,1.46,0,8.54,.84,0,7.78,.38,0,6.91,.1,0,5.98,0,0,5,.1,0,4.02,.38,0,3.09,.84,0,2.22,1.46,0,1.46,2.22,0,.84,3.09,0,.38,4.02,0,.1,4.02,0,.1].map(x=>x/10);
+// var uv = [.25,.49,.25,.25,.3,.49,.34,.47,.38,.45,.42,.42,.45,.38,.47,.34,.49,.3,.49,.25,.49,.2,.47,.16,.45,.12,.42,.08,.38,.05,.34,.03,.3,.01,.25,.01,.2,.01,.16,.03,.12,.05,.08,.08,.05,.12,.03,.16,.01,.2,.01,.25,.01,.3,.03,.34,.05,.38,.08,.42,.12,.45,.16,.47,.75,.49,.8,.49,.84,.47,.88,.45,.92,.42,.95,.38,.97,.34,.99,.3,.99,.25,.99,.2,.97,.16,.95,.12,.92,.08,.88,.05,.84,.03,.8,.01,.75,.01,.7,.01,.66,.03,.62,.05,.58,.08,.55,.12,.53,.16,.51,.2,.51,.25,.51,.3,.53,.34,.55,.38,.58,.42,.62,.45,.66,.47,.7,.49,.2,.49];
+// var indices = [0,1,2,2,1,3,3,1,4,4,1,5,5,1,6,6,1,7,7,1,8,8,1,9,9,1,10,10,1,11,11,1,12,12,1,13,13,1,14,14,1,15,15,1,16,16,1,17,17,1,18,18,1,19,19,1,20,20,1,21,21,1,22,22,1,23,23,1,24,24,1,25,25,1,26,26,1,27,27,1,28,28,1,29,29,1,30,30,1,31,32,33,34,32,34,35,32,35,36,32,36,37,32,37,38,32,38,39,32,39,40,32,40,41,32,41,42,32,42,43,32,43,44,32,44,45,32,45,46,32,46,47,32,47,48,32,48,49,32,49,50,32,50,51,32,51,52,32,52,53,32,53,54,32,54,55,32,55,56,32,56,57,32,57,58,32,58,59,32,59,60,32,60,61,32,61,62,32,62,63,31,1,64,64,1,0];
+
+
+// const vertices = [1, -1, -1, 1, -1, 1, -1, -1, 1, -1, -1, -1, 1, 1, -1, 1, 1, 1, -1, 1, 1, -1, 1, -1];
+// const indices = [0, 1, 2, 0, 2, 3, 4, 7, 6, 4, 6, 5, 1, 5, 6, 1, 6, 2, 2, 6, 7, 2, 7, 3, 4, 0, 3, 4, 3, 7, 0, 4, 5, 0, 5, 1];
+
+
+var _verts = [new CANNON.Vec3(0,0,0),
+                         new CANNON.Vec3(2,0,0),
+                         new CANNON.Vec3(0,2,0),
+                         new CANNON.Vec3(0,0,2)];
+
+var _faces = [
+            [0,3,2], // -x
+            [0,1,3], // -y
+            [0,2,1], // -z
+            [1,2,3], // +xyz
+        ]
+
+const vertices = [0,0,0, 2,0,0, 0,2,0, 0,0,2]
+const indices = [0,3,2, 0,1,3, 0,2,1, 1,2,3];
+       
+
+
+// 将扁平化的顶点数据、索引数据转换为 CANNON.Vec3 对象的数组
+function returnVec3Data(verticesData, indicesData){
+    const vertices = [];
+    for (let i = 0; i < verticesData.length; i += 3) {
+        vertices.push(new CANNON.Vec3(verticesData[i], verticesData[i + 1], verticesData[i + 2]));
+    }
+    const faces = [];
+    for (let i = 0; i < indicesData.length; i += 3) {
+        faces.push([indicesData[i], indicesData[i + 1], indicesData[i + 2]]);
+    }
+    const convexPolyhedron = new CANNON.ConvexPolyhedron(vertices, faces);
+    return convexPolyhedron;
+}
+
+// console.log('下面是 box');
+// console.log(new CANNON.Box(new CANNON.Vec3(1, 1, 1)));
+// console.log('下面是 四面体');
+
+// // 创建一个 ConvexPolyhedron 形状
+const shape = returnVec3Data(vertices, indices);
+
+// console.log(shape);
+
+const testbody = new CANNON.Body({
+  mass: 1, // 质量
+//   shape: new CANNON.Box(new CANNON.Vec3(1, 1, 1)),
+//   shape: shape,
+  shape: new CANNON.ConvexPolyhedron(_verts, _faces),
+  position: new CANNON.Vec3(-26, 50, -25),
+//   quaternion: new CANNON.Quaternion(),
+//   material: ccgxk.cannonDefaultCantactMaterial,
+});
+ccgxk.world.addBody(testbody);
+
+W.add("zhuiti", {
+  vertices: vertices,
+  indices: indices,
+//   uv: uv,
+});
+
+W.zhuiti({n:"testtestbody",size: 1, x:-26,z:-25,y:50});
+var testresult = {name: 'testtestbody', body: testbody, rX: 0, rY: 0, rZ: 0};
+
+ccgxk.bodylist.push(testresult);      // W 的属性还是有点问题~~
+
+// W.add("zhuiti", {
+//               vertices: [5,0,0,5,10,5,5.98,0,.1,6.91,0,.38,7.78,0,.84,8.54,0,1.46,9.16,0,2.22,9.62,0,3.09,9.9,0,4.02,10,0,5,9.9,0,5.98,9.62,0,6.91,9.16,0,7.78,8.54,0,8.54,7.78,0,9.16,6.91,0,9.62,5.98,0,9.9,5,0,10,4.02,0,9.9,3.09,0,9.62,2.22,0,9.16,1.46,0,8.54,.84,0,7.78,.38,0,6.91,.1,0,5.98,0,0,5,.1,0,4.02,.38,0,3.09,.84,0,2.22,1.46,0,1.46,2.22,0,.84,3.09,0,.38,5,0,0,5.98,0,.1,6.91,0,.38,7.78,0,.84,8.54,0,1.46,9.16,0,2.22,9.62,0,3.09,9.9,0,4.02,10,0,5,9.9,0,5.98,9.62,0,6.91,9.16,0,7.78,8.54,0,8.54,7.78,0,9.16,6.91,0,9.62,5.98,0,9.9,5,0,10,4.02,0,9.9,3.09,0,9.62,2.22,0,9.16,1.46,0,8.54,.84,0,7.78,.38,0,6.91,.1,0,5.98,0,0,5,.1,0,4.02,.38,0,3.09,.84,0,2.22,1.46,0,1.46,2.22,0,.84,3.09,0,.38,4.02,0,.1,4.02,0,.1].map(x=>x/10),
+//               uv: [.25,.49,.25,.25,.3,.49,.34,.47,.38,.45,.42,.42,.45,.38,.47,.34,.49,.3,.49,.25,.49,.2,.47,.16,.45,.12,.42,.08,.38,.05,.34,.03,.3,.01,.25,.01,.2,.01,.16,.03,.12,.05,.08,.08,.05,.12,.03,.16,.01,.2,.01,.25,.01,.3,.03,.34,.05,.38,.08,.42,.12,.45,.16,.47,.75,.49,.8,.49,.84,.47,.88,.45,.92,.42,.95,.38,.97,.34,.99,.3,.99,.25,.99,.2,.97,.16,.95,.12,.92,.08,.88,.05,.84,.03,.8,.01,.75,.01,.7,.01,.66,.03,.62,.05,.58,.08,.55,.12,.53,.16,.51,.2,.51,.25,.51,.3,.53,.34,.55,.38,.58,.42,.62,.45,.66,.47,.7,.49,.2,.49],
+//               indices: [0,1,2,2,1,3,3,1,4,4,1,5,5,1,6,6,1,7,7,1,8,8,1,9,9,1,10,10,1,11,11,1,12,12,1,13,13,1,14,14,1,15,15,1,16,16,1,17,17,1,18,18,1,19,19,1,20,20,1,21,21,1,22,22,1,23,23,1,24,24,1,25,25,1,26,26,1,27,27,1,28,28,1,29,29,1,30,30,1,31,32,33,34,32,34,35,32,35,36,32,36,37,32,37,38,32,38,39,32,39,40,32,40,41,32,41,42,32,42,43,32,43,44,32,44,45,32,45,46,32,46,47,32,47,48,32,48,49,32,49,50,32,50,51,32,51,52,32,52,53,32,53,54,32,54,55,32,55,56,32,56,57,32,57,58,32,58,59,32,59,60,32,60,61,32,61,62,32,62,63,31,1,64,64,1,0]
+//             });
+//             W.zhuiti({n:"obj",size: 5,y:2});
+
+
+
+// W.add("modeTest", {
+//   vertices: [1,-1,-1,1,-1,1,-1,-1,1,-1,-1,-1,1,1,-1,1,1,1,-1,1,1,-1,1,-1],
+//   indices: [0,1,2,0,2,3,4,7,6,4,6,5,1,5,6,1,6,2,2,6,7,2,7,3,4,0,3,4,3,7,0,4,5,0,5,1]
+// });
+
+
+
+
+// 现在你可以继续进行物理模拟
 
 
 
