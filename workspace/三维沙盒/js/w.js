@@ -149,12 +149,19 @@ W = {
     
     // 如果设置了fov，则重新计算投影矩阵（近裁剪面：1，远裁剪面：1000，宽高比：画布比例）
     if(state.fov){
+      //【修改】，增加 fov 值
       W.projection =     
+        // new DOMMatrix([
+        //   (1 / Math.tan(state.fov * Math.PI / 180)) / (W.canvas.width / W.canvas.height), 0, 0, 0, 
+        //   0, (1 / Math.tan(state.fov * Math.PI / 180)), 0, 0, 
+        //   0, 0, -1001 / 999, -1,
+        //   0, 0, -2002 / 999, 0
+        // ]);
         new DOMMatrix([
           (1 / Math.tan(state.fov * Math.PI / 180)) / (W.canvas.width / W.canvas.height), 0, 0, 0, 
           0, (1 / Math.tan(state.fov * Math.PI / 180)), 0, 0, 
-          0, 0, -1001 / 999, -1,
-          0, 0, -2002 / 999, 0
+          0, 0, -10001 / 9999, -1,
+          0, 0, -20002 / 9999, 0
         ]);
     }
     

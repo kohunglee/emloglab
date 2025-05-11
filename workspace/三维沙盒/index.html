@@ -4,9 +4,9 @@
 <img src='./img/texture.jpeg' id=marble hidden>
 <canvas id=c width=320 height=300></canvas>
 <div id="fpsInfo"></div>
-<span id="shiftInfo"></span> | 
-<span id="posInfo"></span> | 
-<span id="metrics"></span> |
+<span id="shiftInfo"></span>
+<span id="posInfo"></span>
+<span id="metrics"></span>
 <span id="cpuInfo"></span>
 <script>
 
@@ -67,7 +67,7 @@ var ccgxk = {
         this.world.addContactMaterial(this.cannonDefaultCantactMaterial);  // 默认材质关联
         this.eventListener();  // 事件监听
         this.animate(); // 动画
-        shiftInfo.innerHTML = 'speed:' + 25
+        shiftInfo.innerHTML = 'speed:' + 25 + ' | ' // 【测试，临时】
     },
 
     // 默认材质关联材质
@@ -83,7 +83,7 @@ var ccgxk = {
 
     // 添加 box 物理体
     addPhysicalBox : function({ 
-                name = 'k'+(Math.random()*10**9|0),  // 如果没指认，则使用随机数生成 ID
+                isPhysical = true, isVisualMode = true, name = 'k'+(Math.random()*10**9|0),  // 如果没指认，则使用随机数生成 ID
                 X = 5, Y = 5, Z = 5,
                 mass = 0, width = 1, depth = 1, height = 1, size = 1,
                 texture = null, smooth = 0,  // 因为 W.js 版本问题， smooth 暂时为 0
@@ -91,20 +91,25 @@ var ccgxk = {
         if(size !== 1){
             width =  depth =  height = size;
         }
-        const body = new CANNON.Body({
-            mass : mass,
-            shape: new CANNON.Box(new CANNON.Vec3(width, height, depth)),
-            position: new CANNON.Vec3(X, Y, Z),
-            material: this.cannonDefaultCantactMaterial,
-        });
-        this.world.addBody(body);
-        W.cube({
-            n: name,
-            w: width * 2, d: depth * 2, h: height * 2,
-            x: X, y:Y, z:Z, t: texture, s: smooth,
-            rx: rX, ry: rY, rz: rZ, b: background, mix: mixValue
-        });
-        var result = { name, body, rX, rY, rZ };
+        var body = null;
+        if(isPhysical){  // 是否创建物理计算体
+            body = new CANNON.Body({
+                mass : mass,
+                shape: new CANNON.Box(new CANNON.Vec3(width, height, depth)),
+                position: new CANNON.Vec3(X, Y, Z),
+                material: this.cannonDefaultCantactMaterial,
+            });
+            this.world.addBody(body);
+        }
+        if(isVisualMode){  // 是否可视化
+            W.cube({
+                n: name,
+                w: width * 2, d: depth * 2, h: height * 2,
+                x: X, y:Y, z:Z, t: texture, s: smooth,
+                rx: rX, ry: rY, rz: rZ, b: background, mix: mixValue
+            });
+        }
+        var result = { name, body, X, Y, Z, rX, rY, rZ, isVisualMode };
         this.bodylist.push(result);
         return result;
     },
@@ -113,21 +118,28 @@ var ccgxk = {
     updataBodylist : function(){
         for (let i = 0; i < this.bodylist.length; i++) {
             let indexItem = this.bodylist[i];
-            let pos = indexItem.body.position;
-            let quat = indexItem.body.quaternion;
-            let indexItemEuler = wMath.quaternionToEuler(quat);
-            indexItem.rX = indexItemEuler.rX;
-            indexItem.rY = indexItemEuler.rY;
-            indexItem.rZ = indexItemEuler.rZ;
-            W.move({
-                n: indexItem.name,
-                x: pos.x,
-                y: pos.y,
-                z: pos.z,
-                rx: indexItem.rX,
-                ry: indexItem.rY,
-                rz: indexItem.rZ,
-            });
+            if(indexItem.body !== null){ 
+                let pos = indexItem.body.position;
+                let quat = indexItem.body.quaternion;
+                let indexItemEuler = wMath.quaternionToEuler(quat);
+                indexItem.rX = indexItemEuler.rX;
+                indexItem.rY = indexItemEuler.rY;
+                indexItem.rZ = indexItemEuler.rZ;
+                indexItem.X = pos.x;
+                indexItem.Y = pos.y;
+                indexItem.Z = pos.z;
+            }
+            if(indexItem.isVisualMode){
+                W.move({
+                    n: indexItem.name,
+                    x: indexItem.X,
+                    y: indexItem.Y,
+                    z: indexItem.Z,
+                    rx: indexItem.rX,
+                    ry: indexItem.rY,
+                    rz: indexItem.rZ,
+                });
+            }
         }
     },
 
@@ -153,8 +165,6 @@ var ccgxk = {
         's': 'viewBackward',
         'a': 'viewLeft',
         'd': 'viewRight',
-        // 'q': 'turnLeft',
-        // 'e': 'turnRight',
         'r': 'viewUp',
         'v': 'viewDown',
         'o': 'turnUp',
@@ -208,23 +218,16 @@ var ccgxk = {
         var action = this.keyMap[e.key.toLowerCase()];
         if (action) { this.keys[action] = value; }
         if (e.keyCode === 32 && this.mainVPlayer !== null) {  // 空格键
-            var limit = this.mainVPlayer.body.position.y <= 0;
-            limit = true;
+            var limit = this.mainVPlayer.body.position.y <= 10000;
             if (this.keys.jumping === 0 && limit) {
                 this.mainVPlayer.body.velocity.y = 10;
             }
             this.keys.jumping = value;
         }
-        if (e.keyCode === 16 || e.key.toLowerCase() === 'e') {  // shift键 或 q
+        // if (e.keyCode === 16 || e.key.toLowerCase() === 'q') {  // shift键 或 q 开启加速
+        if (e.key.toLowerCase() === 'q') {  // 按键 q 开启加速
             this.isShiftPress = value;
         }
-    },
-
-    // 主角移动和旋转
-    mainVPlayerMove : function(mainVPlayerObj){
-        if(mainVPlayerObj === null){return};
-        var cam = this.mainCamera;
-        cam.groupName = mainVPlayerObj.name;
     },
 
     // 向前（后）移动的加速度辅助计算值
@@ -236,7 +239,7 @@ var ccgxk = {
             posInfo.innerHTML = (
                 'pos: x:' + Math.round(this.mainVPlayer.body.position.x) +
                 ', y:' + Math.round(this.mainVPlayer.body.position.y) +
-                ', z:' + Math.round(this.mainVPlayer.body.position.z)
+                ', z:' + Math.round(this.mainVPlayer.body.position.z) + ' | '
             );
         }
     },
@@ -246,7 +249,7 @@ var ccgxk = {
         const keys = this.keys;
         if (keys.viewForward || keys.viewBackward) { // 前后平移
             var speed = (this.isShiftPress) ? Math.max(0.1,4-(this.forwardAcc+=0.01)) :4+0*(this.forwardAcc=0.01);  // 加速度
-            shiftInfo.innerHTML = 'speed:' + Math.round((100 / speed));
+            shiftInfo.innerHTML = 'speed:' + Math.round((100 / speed)) + ' | ';
             Z += (-keys.viewForward + keys.viewBackward) * Math.cos(RY * Math.PI / 180) / speed;
             X += (-keys.viewForward + keys.viewBackward) * Math.sin(RY * Math.PI / 180) / speed;
             this.displayPOS();
@@ -331,14 +334,14 @@ var ccgxk = {
     // 添加自定义顶点数据的物体
     addCustomDataObj : function({ 
                 name = 'custom'+(Math.random()*10**9|0),  // 如果没指认，则使用随机数生成 ID
+                modelName = null,  // 模型名
                 X = 5, Y = 5, Z = 5,
                 mass = 0, size = 1,
                 verticesData = [], indicesData = [],
                 texture = null, smooth = 0,  // 因为 W.js 版本问题， smooth 暂时为 0
                 background = '#888', mixValue = 0.71, rX = 0, rY = 0, rZ = 0 } = {}){
         if(verticesData.length === 0 || indicesData.length === 0){ console.error('没有添加模型数据！');return; }
-        // const myshape = this.returnVec3Data(verticesData.map(v => v * size), indicesData);
-        const myshape = new CANNON.Trimesh(verticesData.map(v => v * size), indicesData);
+        const myshape = this.returnVec3Data(verticesData.map(v => v * size), indicesData);
         const tempBody = new CANNON.Body({
             mass: mass,
             shape: myshape,
@@ -346,11 +349,14 @@ var ccgxk = {
             material: this.cannonDefaultCantactMaterial,
         });
         this.world.addBody(tempBody);
-        W.add(name, {  // W 引擎引入模型数据
-            vertices: verticesData,
-            indices: indicesData,
-        });
-        W[name]({n:name,size: size, x:X, z:Z, y:Y});  // 可能会造成重复添加同一种模型，之后要改
+        modelName = modelName || name;  // 指认了模型名，就使用模型
+        if(W.modelName === undefined) {
+            W.add(modelName, {  // W 引擎引入模型数据
+                vertices: verticesData,
+                indices: indicesData,
+            });
+        }
+        W[modelName]({n:name,size: size, x:X, z:Z, y:Y});  // 可能会造成重复添加同一种模型，之后要改
         var result = {name: name, body: tempBody, rX: 0, rY: 0, rZ: 0};
         this.bodylist.push(result);  // 向 CCGXK 项目内追加
     },
@@ -385,7 +391,7 @@ var ccgxk = {
         if (performance.memory) {
             const mem = performance.memory;
             output.innerHTML = `内存: ${(mem.usedJSHeapSize/1048576).toFixed(1)}MB/` +
-                    `${(mem.jsHeapSizeLimit/1048576).toFixed(1)}MB`;
+                    `${(mem.jsHeapSizeLimit/1048576).toFixed(1)}MB`  + ' | ';
         }
     },
 
@@ -420,7 +426,7 @@ ccgxk.addPhysicalBox({  // 创建一个 旋转测试 细长物理体
 
 ccgxk.addPhysicalBox({  // 创建地面
     name: 'groundPlane', X: 0, Y: -0.5, Z: 0,
-    mass: 0, width: 900000, depth: 900000, height: 1,
+    mass: 0, width: 5000, depth: 5000, height: 1,
     texture: marble, background: '#FFF', mixValue: 0.71
 });
 
@@ -439,28 +445,14 @@ ccgxk.mainVPlayer = ccgxk.addPhysicalBox({  // 创建一个立方体，并设置
 
 
 
-// // 四面体
+// 添加四面体
 var vertices = [0,0,0,  1,0,0,  0,1,3,  0,0,3, ];
 var indices = [0,3,2,  0,1,3,  0,2,1,  1,2,3,  ];
-
-
-// var vertices = [0,0,10,0,3.33,10,0,3.33,6.67,0,0,6.67,3.33,3.33,6.67,3.33,0,6.67,3.33,3.33,10,3.33,0,10,0,3.33,10,0,0,10,0,0,6.67,0,0,10,0,3.33,6.67,0,3.33,10,6.67,0,3.33,6.67,3.33,3.33,6.67,3.33,0,6.67,0,0,10,3.33,0,10,0,0,10,3.33,3.33,10,0,3.33,6.67,3.33,3.33,6.67,0,3.33,6.67,0,0,6.67,0,3.33,6.67,3.33,0,6.67,3.33,3.33] ;
-// var indices = [0,1,2,0,2,3,3,2,4,3,4,5,5,4,6,5,6,7,7,6,8,7,8,9,10,5,7,10,7,11,4,12,13,4,13,6,14,15,16,14,16,17,17,16,18,17,18,19,19,18,20,19,20,21,21,20,22,21,22,23,24,19,21,24,21,25,18,26,27,18,27,20];
 ccgxk.addCustomDataObj({
     name: 'custom',
     X: 0, Y: 15, Z: 0,
     size : 10,
     mass: 0,
-    verticesData: vertices,
-    indicesData: indices,
-    texture: marble
-})
-
-ccgxk.addCustomDataObj({
-    name: 'custom2',
-    X: 0, Y: 15, Z: 0,
-    size : 10,
-    mass: 1,
     verticesData: vertices,
     indicesData: indices,
     texture: marble
@@ -472,82 +464,30 @@ ccgxk.addCustomDataObj({
 
 */
 
-class CPUMonitor {
-  constructor(sampleInterval = 1000) {
-    this.sampleInterval = sampleInterval;
-    this.lastTime = performance.now();
-    this.busyTime = 0;
-    this.sampleStart = 0;
-    this.usage = 0;
-    this.isRunning = false;
-  }
-
-  start() {
-    if (this.isRunning) return;
-    this.isRunning = true;
-    this.sampleStart = performance.now();
-    this._runMonitor();
-  }
-
-  stop() {
-    this.isRunning = false;
-  }
-
-  _runMonitor() {
-    if (!this.isRunning) return;
-
-    const now = performance.now();
-    const elapsed = now - this.lastTime;
-    
-    // 计算脚本执行时间（busy time）
-    const busyStart = performance.now();
-    this._doSomeWork(); // 模拟工作负载
-    const busyEnd = performance.now();
-    this.busyTime += busyEnd - busyStart;
-
-    // 定期采样
-    if (now - this.sampleStart >= this.sampleInterval) {
-      this.usage = (this.busyTime / (now - this.sampleStart)) * 100;
-      cpuInfo.innerHTML = (`CPU使用率: ${this.usage.toFixed(1)}%`);
-      
-      // 重置采样周期
-      this.sampleStart = now;
-      this.busyTime = 0;
-    }
-
-    this.lastTime = now;
-    requestAnimationFrame(() => this._runMonitor());
-  }
-
-  // 模拟工作负载（可根据实际需求调整）
-  _doSomeWork() {
-    let sum = 0;
-    for (let i = 0; i < 1000000; i++) {
-      sum += Math.random();
-    }
-    return sum;
-  }
-}
-
-// 使用示例
-const monitor = new CPUMonitor();
-monitor.start();
-
-// 停止监控（需要时调用）
-// monitor.stop();
-
-
 // 生成 100 个模型
 
-var yVlaue = 5;
-for(var i = 0; i < 100; i++){  // 创建 10 个立方体
-    ccgxk.addPhysicalBox({
-        X: -Math.floor( Math.random() * 7500 + 1), Y: yVlaue, Z: -Math.floor( Math.random() * 3700 + 1),
-        mass: 0, width: Math.floor( Math.random() * 30 + 1), depth: 5, height: Math.floor( Math.random() * 100 + 1),
-        texture: marble, background: '#FFF', mixValue: 0.71
-    });
-}
-console.log(ccgxk.bodylist.length);
+// var yVlaue = 150;
+// for(var i = 0; i < 100; i++){
+//     ccgxk.addPhysicalBox({
+//         isPhysical: true,
+//         X: -Math.floor( i * 100 + 1 - 5000), Y: yVlaue, Z: -Math.floor( i * 100 + 1 - 5000),
+//         mass: 10, width: Math.floor( Math.random() * 30 + 1), depth: 5, height: Math.floor( Math.random() * 100 + 1),
+//         background: `#${Math.floor(Math.random() * 16777216).toString(16).padStart(6, '0')}`, mixValue: 0.71
+//     });
+// }
+// console.log(ccgxk.bodylist.length);
+
+var yVlaue = 150;
+for(var i = 0; i < 10; i++){
+    for(var j = 0; j < 10; j++){
+        ccgxk.addPhysicalBox({
+            isPhysical: true,
+            X: -Math.floor( j * 900 + 1 - 5000), Y: yVlaue, Z: -Math.floor( i * 900 + 1 - 5000),
+            mass: 10, width: Math.floor( Math.random() * 30 + 1), depth: 5, height: Math.floor( Math.random() * 100 + 1),
+            background: `#${Math.floor(i * 0.1 * 16777216).toString(16).padStart(6, '0')}`, mixValue: 0.71
+        });
+    }
+  }
 
 
 </script>
