@@ -139,14 +139,10 @@ W = {
     // 如果提供了新纹理，则构建并保存在W.textures中
     if(state.t && state.t.width && !W.textures[state.t.id]){
       texture = W.gl.createTexture();
-
-      // W.gl.texParameteri(3553 /* TEXTURE_2D */, 10242 /* TEXTURE_WRAP_S */, 10497 /* REPEAT */);
-      // W.gl.texParameteri(3553 /* TEXTURE_2D */, 10243 /* TEXTURE_WRAP_T */, 10497 /* REPEAT */);
       W.gl.pixelStorei(37441 /* UNPACK_PREMULTIPLY_ALPHA_WEBGL */, true);
       W.gl.bindTexture(3553 /* TEXTURE_2D */, texture);
       W.gl.pixelStorei(37440 /* UNPACK_FLIP_Y_WEBGL */, 1);
       W.gl.texImage2D(3553 /* TEXTURE_2D */, 0, 6408 /* RGBA */, 6408 /* RGBA */, 5121 /* UNSIGNED_BYTE */, state.t);
-      
       W.gl.generateMipmap(3553 /* TEXTURE_2D */);
       W.textures[state.t.id] = texture;
     }
@@ -303,6 +299,7 @@ W = {
 
     // 如果对象有纹理
     if(object.t) {
+
       // 设置纹理的目标（2D或立方图）
       W.gl.bindTexture(3553 /* TEXTURE_2D */, W.textures[object.t.id]);
 
